@@ -30,8 +30,8 @@
   }
   .glow-orb {
     position: absolute;
-    width: 350px;
-    height: 350px;
+    width: 380px;
+    height: 380px;
     background: radial-gradient(circle, rgba(0, 255, 204, 0.12) 0%, transparent 70%);
     top: 50%;
     left: 50%;
@@ -63,7 +63,7 @@
     letter-spacing: 2px;
     padding: 5px 14px;
     border-radius: 20px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
   .paper-indicator {
     display: inline-block;
@@ -89,35 +89,14 @@
   .subtitle {
     color: #94a3b8;
     font-size: 14.5px;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
     line-height: 1.4;
-  }
-  .selector-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 18px;
-    font-size: 14px;
-    color: #cbd5e1;
-  }
-  .paper-select {
-    background: #060a14;
-    border: 1.5px solid #00ffcc;
-    color: #00ffcc;
-    font-family: 'Orbitron', monospace;
-    font-size: 13px;
-    font-weight: 700;
-    padding: 6px 12px;
-    border-radius: 6px;
-    outline: none;
-    cursor: pointer;
   }
   .inputs-row {
     display: flex;
     justify-content: center;
     gap: 8px;
-    margin-bottom: 22px;
+    margin-bottom: 24px;
   }
   .code-input {
     width: 52px;
@@ -267,12 +246,6 @@
     <h1>CYBER VAULT LOCK</h1>
     <div class="subtitle">Enter the 6-character Number System Key from your Paper:</div>
 
-    <div class="selector-row" id="selector-row">
-      <label for="paper-select">Your Paper Number:</label>
-      <select id="paper-select" class="paper-select" onchange="changePaper(this.value)">
-      </select>
-    </div>
-
     <div class="inputs-row">
       <input type="text" maxlength="1" class="code-input" data-index="0" autofocus>
       <input type="text" maxlength="1" class="code-input" data-index="1">
@@ -300,35 +273,23 @@
   </div>
 
 <script>
-  const VAULT_DATABASE = {"01": "CAFE28", "02": "BEEF28", "03": "FACE28", "04": "BABE28", "05": "DEAD28", "06": "FEED28", "07": "CODE28", "08": "A5BE28", "09": "C00L28", "10": "B05528", "11": "ACDC28", "12": "FADE28", "13": "DAF028", "14": "133728", "15": "8A8E28", "16": "DEED28", "17": "BEAD28", "18": "ACED28", "19": "2028EF", "20": "2028A1"};
+  const VAULT_DATABASE = {"01": "CAFE28", "02": "BEEF28", "03": "FACE28", "04": "BABE28", "05": "DEAD28", "06": "FEED28", "07": "C0DE28", "08": "A5BE28", "09": "C00128", "10": "B05528", "11": "ACDC28", "12": "FADE28", "13": "DAF028", "14": "133728", "15": "8A8E28", "16": "DEED28", "17": "BEAD28", "18": "ACED28", "19": "2028EF", "20": "2028A1"};
 
   let currentPaper = "01";
   const urlParams = new URLSearchParams(window.location.search);
   const paramPaper = urlParams.get('p') || urlParams.get('paper');
 
-  const paperSelect = document.getElementById('paper-select');
   const paperIndicator = document.getElementById('paper-indicator');
-  const selectorRow = document.getElementById('selector-row');
   const inputs = document.querySelectorAll('.code-input');
   const statusMsg = document.getElementById('status-msg');
   const modalOverlay = document.getElementById('modal-overlay');
   const revealedCode = document.getElementById('revealed-code');
   const solvedSetTitle = document.getElementById('solved-set-title');
 
-  for (let i = 1; i <= 20; i++) {
-    const key = String(i).padStart(2, '0');
-    const opt = document.createElement('option');
-    opt.value = key;
-    opt.innerText = `Paper Set ${key}`;
-    paperSelect.appendChild(opt);
-  }
-
   if (paramPaper) {
     const cleanParam = String(parseInt(paramPaper)).padStart(2, '0');
     if (VAULT_DATABASE[cleanParam]) {
       currentPaper = cleanParam;
-      paperSelect.value = cleanParam;
-      selectorRow.style.display = 'none';
     }
   }
 
@@ -340,11 +301,6 @@
     inputs[0].focus();
   }
   updatePaperDisplay();
-
-  function changePaper(val) {
-    currentPaper = val;
-    updatePaperDisplay();
-  }
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   function playBeep(freq, type, duration) {
