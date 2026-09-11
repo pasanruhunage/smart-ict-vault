@@ -35,6 +35,12 @@
     transform: translate(-50%, -50%);
     z-index: 1;
     pointer-events: none;
+    animation: pulseGlow 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulseGlow {
+    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
   }
 
   .terminal-container {
@@ -179,7 +185,7 @@
     color: #64748b;
   }
 
-  /* Fullscreen Hack Terminal Transition */
+  /* Fullscreen Hack Transition Screen */
   .hack-screen {
     display: none;
     position: fixed;
@@ -195,7 +201,7 @@
     align-items: center;
   }
 
-  /* Epic Modal Card on Success */
+  /* Success Modal View */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -217,7 +223,6 @@
     padding: 32px 24px;
     text-align: center;
     animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    position: relative;
   }
 
   @keyframes zoomIn {
@@ -276,7 +281,6 @@
   <div class="glow-ring"></div>
   <canvas id="confetti-canvas"></canvas>
 
-  <!-- Main Terminal UI -->
   <div class="terminal-container">
     <div class="brand-header">
       <div class="teacher-name">⚡ PASAN RUHUNAGE &bull; SMART ICT</div>
@@ -313,13 +317,11 @@
     <div class="status-msg" id="status-msg">AWAITING 16-DIGIT PASSCODE...</div>
   </div>
 
-  <!-- Hack Sequence Terminal Overlay -->
   <div class="hack-screen" id="hack-screen">
     <div style="font-size: 24px; font-weight: bold; margin-bottom: 12px;">INITIALIZING CYBER OVERRIDE...</div>
     <div id="hack-logs" style="line-height: 1.6; text-align: left; max-width: 500px;"></div>
   </div>
 
-  <!-- Success Modal View -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal-card">
       <div class="trophy-icon">🏆🔥</div>
@@ -340,7 +342,6 @@
   </div>
 
 <script>
-  // Matrix Canvas Animation
   const bgCanvas = document.getElementById('bg-canvas');
   const bgCtx = bgCanvas.getContext('2d');
   function resizeCanvas() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
@@ -455,7 +456,6 @@
       statusMsg.innerText = "ACCESS GRANTED! OVERRIDING MAINFRAME...";
       playSuccessSound();
 
-      // Trigger Cyber Hack Sequence
       hackScreen.style.display = 'flex';
       const logs = [
         "> [OK] 16-Bit Hash Verification: MATCHED",
@@ -480,9 +480,20 @@
       }, 1800);
 
     } else {
+      let copiedFrom = null;
+      for (const [pNum, pCode] of Object.entries(VAULT_DATABASE)) {
+        if (pCode === enteredCode && pNum !== currentPaper) {
+          copiedFrom = pNum;
+          break;
+        }
+      }
       inputs.forEach(i => { i.classList.remove('success'); i.classList.add('error'); });
       statusMsg.style.color = "#ef4444";
-      statusMsg.innerText = "❌ ACCESS DENIED! කේතය වැරදියි. ගණනය කිරීම් නැවත බලන්න.";
+      if (copiedFrom) {
+        statusMsg.innerText = `🚫 INVALID KEY! (මෙය Paper Set ${copiedFrom} හි කේතයකි. Copy කිරීමෙන් වලකින්න!)`;
+      } else {
+        statusMsg.innerText = `❌ ACCESS DENIED! කේතය වැරදියි. ගණනය කිරීම් නැවත බලන්න.`;
+      }
       playSynth(150, 'sawtooth', 0.3);
       setTimeout(() => { inputs.forEach(i => i.classList.remove('error')); }, 1200);
     }
