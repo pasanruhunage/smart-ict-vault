@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SMART ICT — Cyber Vault Terminal (AL 2028)</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<title>PASAN RUHUNAGE — Cyber Vault Terminal (AL 2028)</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background-color: #050811;
+    background-color: #030712;
     color: #e2e8f0;
     font-family: 'Rajdhani', sans-serif;
     min-height: 100vh;
@@ -18,88 +18,107 @@
     overflow-x: hidden;
     position: relative;
   }
-  .grid-bg {
-    position: absolute;
+
+  /* Animated Cyber Background Canvas */
+  #bg-canvas {
+    position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-image: 
-      linear-gradient(rgba(0, 255, 204, 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 204, 0.06) 1px, transparent 1px);
-    background-size: 32px 32px;
     z-index: 0;
     pointer-events: none;
   }
-  .glow-orb {
+
+  .glow-ring {
     position: absolute;
-    width: 450px;
-    height: 450px;
-    background: radial-gradient(circle, rgba(0, 255, 204, 0.12) 0%, transparent 70%);
+    width: 550px;
+    height: 550px;
+    background: radial-gradient(circle, rgba(0, 255, 204, 0.12) 0%, rgba(0, 180, 216, 0.05) 50%, transparent 70%);
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1;
     pointer-events: none;
+    animation: pulseGlow 4s ease-in-out infinite alternate;
   }
+
+  @keyframes pulseGlow {
+    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
+  }
+
+  /* Main Terminal Card */
   .terminal-container {
     position: relative;
     z-index: 10;
     width: 95%;
     max-width: 680px;
-    background: rgba(11, 19, 36, 0.94);
+    background: rgba(11, 19, 36, 0.92);
     border: 2px solid #00ffcc;
-    box-shadow: 0 0 35px rgba(0, 255, 204, 0.3), inset 0 0 20px rgba(0, 255, 204, 0.12);
-    border-radius: 14px;
-    padding: 28px 20px;
+    box-shadow: 0 0 35px rgba(0, 255, 204, 0.35), inset 0 0 20px rgba(0, 255, 204, 0.12);
+    border-radius: 16px;
+    padding: 28px 22px;
     text-align: center;
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
   }
-  .badge-header {
-    display: inline-block;
-    background: rgba(0, 255, 204, 0.15);
-    border: 1px solid #00ffcc;
-    color: #00ffcc;
+
+  /* Teacher Branding Header */
+  .brand-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.25);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+  }
+
+  .teacher-name {
     font-family: 'Orbitron', monospace;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 900;
+    color: #00ffcc;
     letter-spacing: 2px;
-    padding: 4px 12px;
-    border-radius: 20px;
-    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
   }
+
   .paper-indicator {
-    display: inline-block;
     background: #ffe600;
     color: #000;
     font-family: 'Orbitron', monospace;
     font-size: 11px;
     font-weight: 900;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: 4px;
-    margin-left: 6px;
+    letter-spacing: 1px;
   }
+
   h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 22px;
+    font-size: 23px;
     font-weight: 900;
     letter-spacing: 2px;
     color: #ffffff;
     text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
     margin-bottom: 4px;
   }
+
   .subtitle {
     color: #94a3b8;
     font-size: 13.5px;
     margin-bottom: 18px;
   }
+
+  /* 16 Inputs in 2 Rows of 8 */
   .inputs-container {
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-bottom: 20px;
   }
+
   .inputs-row {
     display: flex;
     justify-content: center;
     gap: 6px;
   }
+
   .code-input {
     width: 38px;
     height: 48px;
@@ -114,28 +133,33 @@
     text-transform: uppercase;
     transition: all 0.2s ease;
   }
+
   .code-input:focus {
     outline: none;
     border-color: #00ffcc;
-    box-shadow: 0 0 12px rgba(0, 255, 204, 0.5);
+    box-shadow: 0 0 12px rgba(0, 255, 204, 0.6);
     transform: translateY(-2px);
   }
+
   .code-input.error {
     border-color: #ef4444;
     color: #ef4444;
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
     animation: shake 0.4s ease;
   }
+
   .code-input.success {
     border-color: #22c55e;
     color: #22c55e;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
   }
+
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
     20%, 60% { transform: translateX(-4px); }
     40%, 80% { transform: translateX(4px); }
   }
+
   .unlock-btn {
     width: 100%;
     background: linear-gradient(135deg, #00ffcc 0%, #00b4d8 100%);
@@ -144,12 +168,19 @@
     font-size: 15px;
     font-weight: 900;
     letter-spacing: 2px;
-    padding: 12px 20px;
+    padding: 13px 20px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     box-shadow: 0 0 25px rgba(0, 255, 204, 0.35);
+    transition: all 0.25s ease;
   }
+
+  .unlock-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 35px rgba(0, 255, 204, 0.65);
+  }
+
   .status-msg {
     margin-top: 14px;
     font-size: 13.5px;
@@ -157,6 +188,8 @@
     min-height: 20px;
     color: #64748b;
   }
+
+  /* Modal Card on Success */
   .modal-overlay {
     display: none;
     position: fixed;
@@ -167,6 +200,7 @@
     align-items: center;
     backdrop-filter: blur(10px);
   }
+
   .modal-card {
     background: #0d1527;
     border: 2px solid #ffe600;
@@ -174,30 +208,33 @@
     border-radius: 16px;
     width: 90%;
     max-width: 520px;
-    padding: 30px 20px;
+    padding: 32px 24px;
     text-align: center;
     animation: zoomIn 0.5s ease;
   }
+
   @keyframes zoomIn {
     from { opacity: 0; transform: scale(0.65); }
     to { opacity: 1; transform: scale(1); }
   }
-  .trophy-icon { font-size: 50px; margin-bottom: 8px; }
-  .modal-card h2 { font-family: 'Orbitron', sans-serif; color: #ffe600; font-size: 20px; margin-bottom: 8px; }
-  .modal-card p { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
-  .brand-footer { color: #64748b; font-size: 12px; font-weight: 600; }
+
+  .trophy-icon { font-size: 52px; margin-bottom: 8px; }
+  .modal-card h2 { font-family: 'Orbitron', sans-serif; color: #ffe600; font-size: 21px; margin-bottom: 8px; }
+  .modal-card p { color: #cbd5e1; font-size: 14.5px; line-height: 1.55; margin-bottom: 16px; }
+  .brand-footer { color: #64748b; font-size: 12.5px; font-weight: 600; }
   #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 150; }
 </style>
 </head>
 <body>
 
-  <div class="grid-bg"></div>
-  <div class="glow-orb"></div>
+  <!-- Background Animated Canvas -->
+  <canvas id="bg-canvas"></canvas>
+  <div class="glow-ring"></div>
   <canvas id="confetti-canvas"></canvas>
 
   <div class="terminal-container">
-    <div class="badge-header">
-      ⚡ SMART ICT &bull; AL 2028 TERMINAL
+    <div class="brand-header">
+      <div class="teacher-name">⚡ PASAN RUHUNAGE &bull; SMART ICT</div>
       <span class="paper-indicator" id="paper-indicator">SET 01</span>
     </div>
     
@@ -237,13 +274,46 @@
       <h2>VAULT UNLOCKED!</h2>
       <p>
         විශිෂ්ටයි! ඔබ <strong>Yellow Paper <span id="solved-set-title">01</span> (ප්‍රශ්න 16ම සම්පූර්ණයෙන් විසඳා)</strong> සාර්ථකව Cyber Vault එක Unlock කර ඇත!<br><br>
-        <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථයක්</strong> කරා යන ඔබේ ගමනට #smart_ict වෙතින් උණුසුම් සුබ පැතුම්! 🚀
+        <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථයක්</strong> කරා යන ඔබේ ගමනට Pasan Ruhunage සහ #smart_ict වෙතින් උණුසුම් සුබ පැතුම්! 🚀
       </p>
       <div class="brand-footer">Pasan Ruhunage &nbsp;|&nbsp; #smart_ict &nbsp;|&nbsp; Master Series 2028</div>
     </div>
   </div>
 
 <script>
+  // 1. Matrix Background Canvas Animation
+  const bgCanvas = document.getElementById('bg-canvas');
+  const bgCtx = bgCanvas.getContext('2d');
+  function resizeCanvas() {
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  const characters = '0123456789ABCDEF01';
+  const fontSize = 14;
+  let columns = Math.floor(bgCanvas.width / fontSize);
+  let drops = Array(columns).fill(1);
+
+  function drawMatrix() {
+    bgCtx.fillStyle = 'rgba(3, 7, 18, 0.08)';
+    bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+    bgCtx.fillStyle = '#00ffcc';
+    bgCtx.font = fontSize + 'px monospace';
+
+    for (let i = 0; i < drops.length; i++) {
+      const text = characters.charAt(Math.floor(Math.random() * characters.length));
+      bgCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+      if (drops[i] * fontSize > bgCanvas.height && Math.random() > 0.975) {
+        drops[i] = 0;
+      }
+      drops[i]++;
+    }
+  }
+  setInterval(drawMatrix, 45);
+
+  // 2. Vault Logic
   const VAULT_DATABASE = {
     "01": "CAFE2028BEEF1337", "02": "BEEF2028CAFE5A8E", "03": "FACE2028DEAD1010",
     "04": "BABE2028FEED4095", "05": "DEAD2028B0557256", "06": "FEED2028C0018A8E",
