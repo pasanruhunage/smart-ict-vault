@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PASAN RUHUNAGE — Cyber Vault Terminal (AL 2028)</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background-color: #030712;
+    background-color: #020612;
     color: #e2e8f0;
     font-family: 'Rajdhani', sans-serif;
     min-height: 100vh;
@@ -19,7 +19,6 @@
     position: relative;
   }
 
-  /* Animated Cyber Background Canvas */
   #bg-canvas {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
@@ -29,37 +28,29 @@
 
   .glow-ring {
     position: absolute;
-    width: 550px;
-    height: 550px;
-    background: radial-gradient(circle, rgba(0, 255, 204, 0.12) 0%, rgba(0, 180, 216, 0.05) 50%, transparent 70%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(0, 255, 204, 0.14) 0%, rgba(0, 180, 216, 0.06) 50%, transparent 70%);
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1;
     pointer-events: none;
-    animation: pulseGlow 4s ease-in-out infinite alternate;
   }
 
-  @keyframes pulseGlow {
-    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
-    100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-  }
-
-  /* Main Terminal Card */
   .terminal-container {
     position: relative;
     z-index: 10;
     width: 95%;
-    max-width: 680px;
-    background: rgba(11, 19, 36, 0.92);
+    max-width: 700px;
+    background: rgba(8, 15, 30, 0.94);
     border: 2px solid #00ffcc;
-    box-shadow: 0 0 35px rgba(0, 255, 204, 0.35), inset 0 0 20px rgba(0, 255, 204, 0.12);
+    box-shadow: 0 0 40px rgba(0, 255, 204, 0.35), inset 0 0 20px rgba(0, 255, 204, 0.12);
     border-radius: 16px;
     padding: 28px 22px;
     text-align: center;
     backdrop-filter: blur(14px);
   }
 
-  /* Teacher Branding Header */
   .brand-header {
     display: flex;
     justify-content: space-between;
@@ -91,7 +82,7 @@
 
   h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 23px;
+    font-size: 24px;
     font-weight: 900;
     letter-spacing: 2px;
     color: #ffffff;
@@ -101,11 +92,10 @@
 
   .subtitle {
     color: #94a3b8;
-    font-size: 13.5px;
+    font-size: 14px;
     margin-bottom: 18px;
   }
 
-  /* 16 Inputs in 2 Rows of 8 */
   .inputs-container {
     display: flex;
     flex-direction: column;
@@ -120,14 +110,14 @@
   }
 
   .code-input {
-    width: 38px;
-    height: 48px;
-    background: #060a12;
+    width: 40px;
+    height: 50px;
+    background: #040814;
     border: 2px solid #1e293b;
     border-radius: 6px;
     color: #00ffcc;
     font-family: 'Orbitron', monospace;
-    font-size: 18px;
+    font-size: 19px;
     font-weight: 900;
     text-align: center;
     text-transform: uppercase;
@@ -137,21 +127,21 @@
   .code-input:focus {
     outline: none;
     border-color: #00ffcc;
-    box-shadow: 0 0 12px rgba(0, 255, 204, 0.6);
+    box-shadow: 0 0 14px rgba(0, 255, 204, 0.6);
     transform: translateY(-2px);
   }
 
   .code-input.error {
     border-color: #ef4444;
     color: #ef4444;
-    box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
     animation: shake 0.4s ease;
   }
 
   .code-input.success {
     border-color: #22c55e;
     color: #22c55e;
-    box-shadow: 0 0 12px rgba(34, 197, 94, 0.7);
+    box-shadow: 0 0 14px rgba(34, 197, 94, 0.7);
   }
 
   @keyframes shake {
@@ -189,49 +179,104 @@
     color: #64748b;
   }
 
-  /* Modal Card on Success */
+  /* Fullscreen Hack Terminal Transition */
+  .hack-screen {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 120;
+    color: #00ffcc;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    padding: 40px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Epic Modal Card on Success */
   .modal-overlay {
     display: none;
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 100;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 150;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(12px);
   }
 
   .modal-card {
-    background: #0d1527;
+    background: #091122;
     border: 2px solid #ffe600;
-    box-shadow: 0 0 50px rgba(255, 230, 0, 0.45);
-    border-radius: 16px;
-    width: 90%;
-    max-width: 520px;
+    box-shadow: 0 0 60px rgba(255, 230, 0, 0.5), inset 0 0 20px rgba(255, 230, 0, 0.1);
+    border-radius: 18px;
+    width: 92%;
+    max-width: 560px;
     padding: 32px 24px;
     text-align: center;
-    animation: zoomIn 0.5s ease;
+    animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
   }
 
   @keyframes zoomIn {
-    from { opacity: 0; transform: scale(0.65); }
+    from { opacity: 0; transform: scale(0.6); }
     to { opacity: 1; transform: scale(1); }
   }
 
-  .trophy-icon { font-size: 52px; margin-bottom: 8px; }
-  .modal-card h2 { font-family: 'Orbitron', sans-serif; color: #ffe600; font-size: 21px; margin-bottom: 8px; }
-  .modal-card p { color: #cbd5e1; font-size: 14.5px; line-height: 1.55; margin-bottom: 16px; }
+  .trophy-icon { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 0 20px rgba(255, 230, 0, 0.8)); }
+  
+  .rank-badge {
+    display: inline-block;
+    background: linear-gradient(90deg, #ff007f, #7928ca);
+    color: #fff;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 1.5px;
+    margin-bottom: 12px;
+  }
+
+  .modal-card h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: #ffe600;
+    font-size: 22px;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  .modal-card p {
+    color: #cbd5e1;
+    font-size: 14.5px;
+    line-height: 1.55;
+    margin-bottom: 16px;
+  }
+
+  .easter-egg-box {
+    background: rgba(0, 255, 204, 0.08);
+    border: 1px dashed #00ffcc;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13.5px;
+    color: #00ffcc;
+    margin-bottom: 16px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
   .brand-footer { color: #64748b; font-size: 12.5px; font-weight: 600; }
-  #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 150; }
+  #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; }
 </style>
 </head>
 <body>
 
-  <!-- Background Animated Canvas -->
   <canvas id="bg-canvas"></canvas>
   <div class="glow-ring"></div>
   <canvas id="confetti-canvas"></canvas>
 
+  <!-- Main Terminal UI -->
   <div class="terminal-container">
     <div class="brand-header">
       <div class="teacher-name">⚡ PASAN RUHUNAGE &bull; SMART ICT</div>
@@ -268,52 +313,59 @@
     <div class="status-msg" id="status-msg">AWAITING 16-DIGIT PASSCODE...</div>
   </div>
 
+  <!-- Hack Sequence Terminal Overlay -->
+  <div class="hack-screen" id="hack-screen">
+    <div style="font-size: 24px; font-weight: bold; margin-bottom: 12px;">INITIALIZING CYBER OVERRIDE...</div>
+    <div id="hack-logs" style="line-height: 1.6; text-align: left; max-width: 500px;"></div>
+  </div>
+
+  <!-- Success Modal View -->
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal-card">
-      <div class="trophy-icon">🏆✨</div>
+      <div class="trophy-icon">🏆🔥</div>
+      <div class="rank-badge">RANK #1 &bull; MASTER CIPHER BREAKER</div>
       <h2>VAULT UNLOCKED!</h2>
       <p>
-        විශිෂ්ටයි! ඔබ <strong>Yellow Paper <span id="solved-set-title">01</span> (ප්‍රශ්න 16ම සම්පූර්ණයෙන් විසඳා)</strong> සාර්ථකව Cyber Vault එක Unlock කර ඇත!<br><br>
-        <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථයක්</strong> කරා යන ඔබේ ගමනට Pasan Ruhunage සහ #smart_ict වෙතින් උණුසුම් සුබ පැතුම්! 🚀
+        සුබ පැතුම්! ඔබ <strong>Yellow Paper <span id="solved-set-title">01</span> හි ප්‍රශ්න 16ම</strong> සාර්ථකව විසඳා Cyber Vault එක Breach කර ඇත!<br><br>
+        <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථය</strong> ඔබේ අතේ! නියම වැඩක්! 🚀
       </p>
+
+      <div class="easter-egg-box">
+        🎁 <strong>SECRET REWARD UNLOCKED:</strong><br>
+        "Logic is the foundation. Discipline is the code. Success is the execution!" &mdash; Pasan Ruhunage
+      </div>
+
       <div class="brand-footer">Pasan Ruhunage &nbsp;|&nbsp; #smart_ict &nbsp;|&nbsp; Master Series 2028</div>
     </div>
   </div>
 
 <script>
-  // 1. Matrix Background Canvas Animation
+  // Matrix Canvas Animation
   const bgCanvas = document.getElementById('bg-canvas');
   const bgCtx = bgCanvas.getContext('2d');
-  function resizeCanvas() {
-    bgCanvas.width = window.innerWidth;
-    bgCanvas.height = window.innerHeight;
-  }
+  function resizeCanvas() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
-  const characters = '0123456789ABCDEF01';
+  const characters = '0123456789ABCDEF';
   const fontSize = 14;
   let columns = Math.floor(bgCanvas.width / fontSize);
   let drops = Array(columns).fill(1);
 
   function drawMatrix() {
-    bgCtx.fillStyle = 'rgba(3, 7, 18, 0.08)';
+    bgCtx.fillStyle = 'rgba(2, 6, 18, 0.08)';
     bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
     bgCtx.fillStyle = '#00ffcc';
     bgCtx.font = fontSize + 'px monospace';
-
     for (let i = 0; i < drops.length; i++) {
       const text = characters.charAt(Math.floor(Math.random() * characters.length));
       bgCtx.fillText(text, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > bgCanvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
+      if (drops[i] * fontSize > bgCanvas.height && Math.random() > 0.975) drops[i] = 0;
       drops[i]++;
     }
   }
-  setInterval(drawMatrix, 45);
+  setInterval(drawMatrix, 40);
 
-  // 2. Vault Logic
   const VAULT_DATABASE = {
     "01": "CAFE2028BEEF1337", "02": "BEEF2028CAFE5A8E", "03": "FACE2028DEAD1010",
     "04": "BABE2028FEED4095", "05": "DEAD2028B0557256", "06": "FEED2028C0018A8E",
@@ -331,6 +383,8 @@
   const paperIndicator = document.getElementById('paper-indicator');
   const inputs = document.querySelectorAll('.code-input');
   const statusMsg = document.getElementById('status-msg');
+  const hackScreen = document.getElementById('hack-screen');
+  const hackLogs = document.getElementById('hack-logs');
   const modalOverlay = document.getElementById('modal-overlay');
   const solvedSetTitle = document.getElementById('solved-set-title');
 
@@ -349,7 +403,7 @@
   updatePaperDisplay();
 
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function playBeep(freq, type, duration) {
+  function playSynth(freq, type, duration) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -364,35 +418,23 @@
   }
 
   function playSuccessSound() {
-    playBeep(523.25, 'sine', 0.12);
-    setTimeout(() => playBeep(659.25, 'sine', 0.12), 100);
-    setTimeout(() => playBeep(783.99, 'sine', 0.12), 200);
-    setTimeout(() => playBeep(1046.50, 'triangle', 0.4), 300);
-  }
-
-  function playErrorSound() {
-    playBeep(220, 'sawtooth', 0.25);
-    setTimeout(() => playBeep(180, 'sawtooth', 0.25), 120);
+    playSynth(440, 'sine', 0.1);
+    setTimeout(() => playSynth(554.37, 'sine', 0.1), 80);
+    setTimeout(() => playSynth(659.25, 'sine', 0.1), 160);
+    setTimeout(() => playSynth(880, 'triangle', 0.4), 240);
   }
 
   inputs.forEach((input, index) => {
     input.addEventListener('input', () => {
       input.value = input.value.toUpperCase();
-      playBeep(400 + index * 30, 'sine', 0.04);
-      if (input.value && index < inputs.length - 1) {
-        inputs[index + 1].focus();
-      }
-      if (index === inputs.length - 1 && input.value) {
-        checkCode();
-      }
+      playSynth(350 + index * 30, 'sine', 0.04);
+      if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
+      if (index === inputs.length - 1 && input.value) checkCode();
     });
 
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !input.value && index > 0) {
-        inputs[index - 1].focus();
-      } else if (e.key === 'Enter') {
-        checkCode();
-      }
+      if (e.key === 'Backspace' && !input.value && index > 0) inputs[index - 1].focus();
+      else if (e.key === 'Enter') checkCode();
     });
   });
 
@@ -410,27 +452,38 @@
     if (enteredCode === correct) {
       inputs.forEach(i => { i.classList.remove('error'); i.classList.add('success'); });
       statusMsg.style.color = "#22c55e";
-      statusMsg.innerText = "ACCESS GRANTED! UNLOCKING VAULT...";
-      solvedSetTitle.innerText = currentPaper;
+      statusMsg.innerText = "ACCESS GRANTED! OVERRIDING MAINFRAME...";
       playSuccessSound();
-      launchConfetti();
-      setTimeout(() => { modalOverlay.style.display = 'flex'; }, 600);
+
+      // Trigger Cyber Hack Sequence
+      hackScreen.style.display = 'flex';
+      const logs = [
+        "> [OK] 16-Bit Hash Verification: MATCHED",
+        "> [OK] Bypassing Security Layer 4...",
+        "> [OK] Decrypting Master Cipher for SET " + currentPaper + "...",
+        "> [OK] Access Granted to Smart ICT Vault!",
+        "> [OK] Welcome Elite Student!"
+      ];
+      hackLogs.innerHTML = "";
+      logs.forEach((log, idx) => {
+        setTimeout(() => {
+          hackLogs.innerHTML += log + "<br>";
+          playSynth(600 + idx * 100, 'sine', 0.05);
+        }, idx * 300);
+      });
+
+      setTimeout(() => {
+        hackScreen.style.display = 'none';
+        solvedSetTitle.innerText = currentPaper;
+        launchConfetti();
+        modalOverlay.style.display = 'flex';
+      }, 1800);
+
     } else {
-      let copiedFrom = null;
-      for (const [pNum, pCode] of Object.entries(VAULT_DATABASE)) {
-        if (pCode === enteredCode && pNum !== currentPaper) {
-          copiedFrom = pNum;
-          break;
-        }
-      }
       inputs.forEach(i => { i.classList.remove('success'); i.classList.add('error'); });
       statusMsg.style.color = "#ef4444";
-      if (copiedFrom) {
-        statusMsg.innerText = `🚫 INVALID KEY! (මෙය Paper Set ${copiedFrom} හි කේතයකි. Copy කිරීමෙන් වලකින්න!)`;
-      } else {
-        statusMsg.innerText = `❌ ACCESS DENIED! කේතය වැරදියි. ගණනය කිරීම් නැවත බලන්න.`;
-      }
-      playErrorSound();
+      statusMsg.innerText = "❌ ACCESS DENIED! කේතය වැරදියි. ගණනය කිරීම් නැවත බලන්න.";
+      playSynth(150, 'sawtooth', 0.3);
       setTimeout(() => { inputs.forEach(i => i.classList.remove('error')); }, 1200);
     }
   }
@@ -442,10 +495,10 @@
     canvas.height = window.innerHeight;
     const pieces = [];
     const colors = ['#00ffcc', '#ffe600', '#ff007f', '#00b4d8', '#ffffff'];
-    for (let i = 0; i < 140; i++) {
+    for (let i = 0; i < 150; i++) {
       pieces.push({
         x: canvas.width / 2, y: canvas.height / 2,
-        vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20 - 5,
+        vx: (Math.random() - 0.5) * 22, vy: (Math.random() - 0.5) * 22 - 6,
         size: Math.random() * 8 + 4, color: colors[Math.floor(Math.random() * colors.length)],
         rotation: Math.random() * 360, rSpeed: (Math.random() - 0.5) * 10
       });
