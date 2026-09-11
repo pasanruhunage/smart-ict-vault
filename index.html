@@ -89,7 +89,6 @@
     font-size: 13.5px;
     margin-bottom: 18px;
   }
-  /* 16 Inputs in 2 Rows of 8 */
   .inputs-container {
     display: flex;
     flex-direction: column;
@@ -206,7 +205,6 @@
     <div class="subtitle">Enter the 16-character Master Key (Q1 to Q16) from your Paper:</div>
 
     <div class="inputs-container">
-      <!-- Row 1: Q1 to Q8 -->
       <div class="inputs-row">
         <input type="text" maxlength="1" class="code-input" data-index="0" autofocus>
         <input type="text" maxlength="1" class="code-input" data-index="1">
@@ -217,7 +215,6 @@
         <input type="text" maxlength="1" class="code-input" data-index="6">
         <input type="text" maxlength="1" class="code-input" data-index="7">
       </div>
-      <!-- Row 2: Q9 to Q16 -->
       <div class="inputs-row">
         <input type="text" maxlength="1" class="code-input" data-index="8">
         <input type="text" maxlength="1" class="code-input" data-index="9">
@@ -247,7 +244,6 @@
   </div>
 
 <script>
-  // 20 Unique 16-character Passcodes (1 digit per question Q1..Q16)
   const VAULT_DATABASE = {
     "01": "CAFE2028BEEF1337", "02": "BEEF2028CAFE5A8E", "03": "FACE2028DEAD1010",
     "04": "BABE2028FEED4095", "05": "DEAD2028B0557256", "06": "FEED2028C0018A8E",
