@@ -30,11 +30,10 @@
   }
   .glow-orb {
     position: absolute;
-    width: 380px;
-    height: 380px;
+    width: 450px;
+    height: 450px;
     background: radial-gradient(circle, rgba(0, 255, 204, 0.12) 0%, transparent 70%);
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1;
     pointer-events: none;
@@ -42,13 +41,13 @@
   .terminal-container {
     position: relative;
     z-index: 10;
-    width: 92%;
-    max-width: 560px;
+    width: 95%;
+    max-width: 680px;
     background: rgba(11, 19, 36, 0.94);
     border: 2px solid #00ffcc;
     box-shadow: 0 0 35px rgba(0, 255, 204, 0.3), inset 0 0 20px rgba(0, 255, 204, 0.12);
     border-radius: 14px;
-    padding: 32px 24px;
+    padding: 28px 20px;
     text-align: center;
     backdrop-filter: blur(12px);
   }
@@ -61,9 +60,9 @@
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 2px;
-    padding: 5px 14px;
+    padding: 4px 12px;
     border-radius: 20px;
-    margin-bottom: 14px;
+    margin-bottom: 10px;
   }
   .paper-indicator {
     display: inline-block;
@@ -72,93 +71,91 @@
     font-family: 'Orbitron', monospace;
     font-size: 11px;
     font-weight: 900;
-    padding: 3px 10px;
+    padding: 2px 8px;
     border-radius: 4px;
     margin-left: 6px;
-    letter-spacing: 1px;
   }
   h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: 25px;
+    font-size: 22px;
     font-weight: 900;
-    letter-spacing: 2.5px;
+    letter-spacing: 2px;
     color: #ffffff;
     text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
   .subtitle {
     color: #94a3b8;
-    font-size: 14.5px;
-    margin-bottom: 24px;
-    line-height: 1.4;
+    font-size: 13.5px;
+    margin-bottom: 18px;
+  }
+  /* 16 Inputs in 2 Rows of 8 */
+  .inputs-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
   }
   .inputs-row {
     display: flex;
     justify-content: center;
-    gap: 8px;
-    margin-bottom: 24px;
+    gap: 6px;
   }
   .code-input {
-    width: 52px;
-    height: 64px;
+    width: 38px;
+    height: 48px;
     background: #060a12;
     border: 2px solid #1e293b;
-    border-radius: 8px;
+    border-radius: 6px;
     color: #00ffcc;
     font-family: 'Orbitron', monospace;
-    font-size: 26px;
+    font-size: 18px;
     font-weight: 900;
     text-align: center;
     text-transform: uppercase;
-    transition: all 0.25s ease;
-    box-shadow: inset 0 2px 5px rgba(0,0,0,0.6);
+    transition: all 0.2s ease;
   }
   .code-input:focus {
     outline: none;
     border-color: #00ffcc;
-    box-shadow: 0 0 18px rgba(0, 255, 204, 0.5), inset 0 0 6px rgba(0, 255, 204, 0.3);
+    box-shadow: 0 0 12px rgba(0, 255, 204, 0.5);
     transform: translateY(-2px);
   }
   .code-input.error {
     border-color: #ef4444;
     color: #ef4444;
-    box-shadow: 0 0 18px rgba(239, 68, 68, 0.5);
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.5);
     animation: shake 0.4s ease;
   }
   .code-input.success {
     border-color: #22c55e;
     color: #22c55e;
-    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
   }
   @keyframes shake {
     0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-6px); }
-    40%, 80% { transform: translateX(6px); }
+    20%, 60% { transform: translateX(-4px); }
+    40%, 80% { transform: translateX(4px); }
   }
   .unlock-btn {
     width: 100%;
     background: linear-gradient(135deg, #00ffcc 0%, #00b4d8 100%);
     color: #050811;
     font-family: 'Orbitron', sans-serif;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 900;
     letter-spacing: 2px;
-    padding: 14px 20px;
+    padding: 12px 20px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
     box-shadow: 0 0 25px rgba(0, 255, 204, 0.35);
   }
-  .unlock-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 35px rgba(0, 255, 204, 0.7);
-  }
   .status-msg {
-    margin-top: 16px;
-    font-size: 14px;
+    margin-top: 14px;
+    font-size: 13.5px;
     font-weight: 700;
-    min-height: 22px;
+    min-height: 20px;
     color: #64748b;
   }
   .modal-overlay {
@@ -178,57 +175,19 @@
     border-radius: 16px;
     width: 90%;
     max-width: 520px;
-    padding: 34px 24px;
+    padding: 30px 20px;
     text-align: center;
-    animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    animation: zoomIn 0.5s ease;
   }
   @keyframes zoomIn {
     from { opacity: 0; transform: scale(0.65); }
     to { opacity: 1; transform: scale(1); }
   }
-  .trophy-icon {
-    font-size: 56px;
-    margin-bottom: 10px;
-    filter: drop-shadow(0 0 15px rgba(255, 230, 0, 0.6));
-  }
-  .modal-card h2 {
-    font-family: 'Orbitron', sans-serif;
-    color: #ffe600;
-    font-size: 22px;
-    margin-bottom: 8px;
-    letter-spacing: 1.5px;
-  }
-  .modal-card p {
-    color: #cbd5e1;
-    font-size: 15px;
-    line-height: 1.55;
-    margin-bottom: 18px;
-  }
-  .passcode-pill {
-    display: inline-block;
-    background: rgba(255, 230, 0, 0.15);
-    border: 1.5px solid #ffe600;
-    color: #ffe600;
-    font-family: 'Orbitron', monospace;
-    font-size: 18px;
-    font-weight: 900;
-    letter-spacing: 6px;
-    padding: 6px 18px;
-    border-radius: 30px;
-    margin-bottom: 16px;
-  }
-  .brand-footer {
-    color: #64748b;
-    font-size: 13px;
-    font-weight: 600;
-    margin-top: 12px;
-  }
-  #confetti-canvas {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 150;
-  }
+  .trophy-icon { font-size: 50px; margin-bottom: 8px; }
+  .modal-card h2 { font-family: 'Orbitron', sans-serif; color: #ffe600; font-size: 20px; margin-bottom: 8px; }
+  .modal-card p { color: #cbd5e1; font-size: 14px; line-height: 1.5; margin-bottom: 16px; }
+  .brand-footer { color: #64748b; font-size: 12px; font-weight: 600; }
+  #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 150; }
 </style>
 </head>
 <body>
@@ -244,28 +203,43 @@
     </div>
     
     <h1>CYBER VAULT LOCK</h1>
-    <div class="subtitle">Enter the 6-character Number System Key from your Paper:</div>
+    <div class="subtitle">Enter the 16-character Master Key (Q1 to Q16) from your Paper:</div>
 
-    <div class="inputs-row">
-      <input type="text" maxlength="1" class="code-input" data-index="0" autofocus>
-      <input type="text" maxlength="1" class="code-input" data-index="1">
-      <input type="text" maxlength="1" class="code-input" data-index="2">
-      <input type="text" maxlength="1" class="code-input" data-index="3">
-      <input type="text" maxlength="1" class="code-input" data-index="4">
-      <input type="text" maxlength="1" class="code-input" data-index="5">
+    <div class="inputs-container">
+      <!-- Row 1: Q1 to Q8 -->
+      <div class="inputs-row">
+        <input type="text" maxlength="1" class="code-input" data-index="0" autofocus>
+        <input type="text" maxlength="1" class="code-input" data-index="1">
+        <input type="text" maxlength="1" class="code-input" data-index="2">
+        <input type="text" maxlength="1" class="code-input" data-index="3">
+        <input type="text" maxlength="1" class="code-input" data-index="4">
+        <input type="text" maxlength="1" class="code-input" data-index="5">
+        <input type="text" maxlength="1" class="code-input" data-index="6">
+        <input type="text" maxlength="1" class="code-input" data-index="7">
+      </div>
+      <!-- Row 2: Q9 to Q16 -->
+      <div class="inputs-row">
+        <input type="text" maxlength="1" class="code-input" data-index="8">
+        <input type="text" maxlength="1" class="code-input" data-index="9">
+        <input type="text" maxlength="1" class="code-input" data-index="10">
+        <input type="text" maxlength="1" class="code-input" data-index="11">
+        <input type="text" maxlength="1" class="code-input" data-index="12">
+        <input type="text" maxlength="1" class="code-input" data-index="13">
+        <input type="text" maxlength="1" class="code-input" data-index="14">
+        <input type="text" maxlength="1" class="code-input" data-index="15">
+      </div>
     </div>
 
     <button class="unlock-btn" onclick="checkCode()">🔓 UNLOCK VAULT</button>
-    <div class="status-msg" id="status-msg">AWAITING 6-DIGIT PASSCODE...</div>
+    <div class="status-msg" id="status-msg">AWAITING 16-DIGIT PASSCODE...</div>
   </div>
 
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal-card">
       <div class="trophy-icon">🏆✨</div>
       <h2>VAULT UNLOCKED!</h2>
-      <div class="passcode-pill" id="revealed-code">CAFE28</div>
       <p>
-        විශිෂ්ටයි! ඔබ <strong>Yellow Paper <span id="solved-set-title">01</span> (Number System 20-Questions Challenge)</strong> සාර්ථකව විසඳා Cyber Vault එක Unlock කර ඇත!<br><br>
+        විශිෂ්ටයි! ඔබ <strong>Yellow Paper <span id="solved-set-title">01</span> (ප්‍රශ්න 16ම සම්පූර්ණයෙන් විසඳා)</strong> සාර්ථකව Cyber Vault එක Unlock කර ඇත!<br><br>
         <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථයක්</strong> කරා යන ඔබේ ගමනට #smart_ict වෙතින් උණුසුම් සුබ පැතුම්! 🚀
       </p>
       <div class="brand-footer">Pasan Ruhunage &nbsp;|&nbsp; #smart_ict &nbsp;|&nbsp; Master Series 2028</div>
@@ -273,7 +247,16 @@
   </div>
 
 <script>
-  const VAULT_DATABASE = {"01": "CAFE28", "02": "BEEF28", "03": "FACE28", "04": "BABE28", "05": "DEAD28", "06": "FEED28", "07": "C0DE28", "08": "A5BE28", "09": "C00128", "10": "B05528", "11": "ACDC28", "12": "FADE28", "13": "DAF028", "14": "133728", "15": "8A8E28", "16": "DEED28", "17": "BEAD28", "18": "ACED28", "19": "2028EF", "20": "2028A1"};
+  // 20 Unique 16-character Passcodes (1 digit per question Q1..Q16)
+  const VAULT_DATABASE = {
+    "01": "CAFE2028BEEF1337", "02": "BEEF2028CAFE5A8E", "03": "FACE2028DEAD1010",
+    "04": "BABE2028FEED4095", "05": "DEAD2028B0557256", "06": "FEED2028C0018A8E",
+    "07": "C0DE2028ACDC3754", "08": "A5BE2028FACE6422", "09": "C0012028BABE1750",
+    "10": "B0552028CAFE3054", "11": "ACDC2028BEEF6553", "12": "FADE2028DEAD9901",
+    "13": "DAF02028FEED1467", "14": "13372028C0DE7654", "15": "8A8E2028A5BE1773",
+    "16": "DEED2028C0011352", "17": "BEAD2028B0551101", "18": "ACED2028ACDC1111",
+    "19": "2028EFBEEFCAFE01", "20": "2028A1FACEFEED02"
+  };
 
   let currentPaper = "01";
   const urlParams = new URLSearchParams(window.location.search);
@@ -283,20 +266,17 @@
   const inputs = document.querySelectorAll('.code-input');
   const statusMsg = document.getElementById('status-msg');
   const modalOverlay = document.getElementById('modal-overlay');
-  const revealedCode = document.getElementById('revealed-code');
   const solvedSetTitle = document.getElementById('solved-set-title');
 
   if (paramPaper) {
     const cleanParam = String(parseInt(paramPaper)).padStart(2, '0');
-    if (VAULT_DATABASE[cleanParam]) {
-      currentPaper = cleanParam;
-    }
+    if (VAULT_DATABASE[cleanParam]) currentPaper = cleanParam;
   }
 
   function updatePaperDisplay() {
     paperIndicator.innerText = `SET ${currentPaper}`;
     statusMsg.style.color = "#64748b";
-    statusMsg.innerText = `AWAITING 6-DIGIT KEY FOR SET ${currentPaper}...`;
+    statusMsg.innerText = `AWAITING 16-DIGIT KEY FOR SET ${currentPaper}...`;
     inputs.forEach(i => { i.value = ''; i.classList.remove('error', 'success'); });
     inputs[0].focus();
   }
@@ -318,21 +298,21 @@
   }
 
   function playSuccessSound() {
-    playBeep(523.25, 'sine', 0.15);
-    setTimeout(() => playBeep(659.25, 'sine', 0.15), 120);
-    setTimeout(() => playBeep(783.99, 'sine', 0.15), 240);
-    setTimeout(() => playBeep(1046.50, 'triangle', 0.5), 360);
+    playBeep(523.25, 'sine', 0.12);
+    setTimeout(() => playBeep(659.25, 'sine', 0.12), 100);
+    setTimeout(() => playBeep(783.99, 'sine', 0.12), 200);
+    setTimeout(() => playBeep(1046.50, 'triangle', 0.4), 300);
   }
 
   function playErrorSound() {
-    playBeep(220, 'sawtooth', 0.3);
-    setTimeout(() => playBeep(180, 'sawtooth', 0.3), 150);
+    playBeep(220, 'sawtooth', 0.25);
+    setTimeout(() => playBeep(180, 'sawtooth', 0.25), 120);
   }
 
   inputs.forEach((input, index) => {
-    input.addEventListener('input', (e) => {
+    input.addEventListener('input', () => {
       input.value = input.value.toUpperCase();
-      playBeep(440 + index * 50, 'sine', 0.05);
+      playBeep(400 + index * 30, 'sine', 0.04);
       if (input.value && index < inputs.length - 1) {
         inputs[index + 1].focus();
       }
@@ -354,25 +334,21 @@
     let enteredCode = "";
     inputs.forEach(input => enteredCode += input.value.trim().toUpperCase());
 
-    if (enteredCode.length < 6) {
+    if (enteredCode.length < 16) {
       statusMsg.style.color = "#f59e0b";
-      statusMsg.innerText = "⚠️ කරුණාකර අගයන් 6 ම සම්පූර්ණ කරන්න!";
+      statusMsg.innerText = "⚠️ කරුණාකර ප්‍රශ්න 16 හිම අගයන් සම්පූර්ණ කරන්න!";
       return;
     }
 
-    const correctForThisPaper = VAULT_DATABASE[currentPaper];
-
-    if (enteredCode === correctForThisPaper) {
+    const correct = VAULT_DATABASE[currentPaper];
+    if (enteredCode === correct) {
       inputs.forEach(i => { i.classList.remove('error'); i.classList.add('success'); });
       statusMsg.style.color = "#22c55e";
       statusMsg.innerText = "ACCESS GRANTED! UNLOCKING VAULT...";
-      revealedCode.innerText = enteredCode;
       solvedSetTitle.innerText = currentPaper;
       playSuccessSound();
       launchConfetti();
-      setTimeout(() => {
-        modalOverlay.style.display = 'flex';
-      }, 650);
+      setTimeout(() => { modalOverlay.style.display = 'flex'; }, 600);
     } else {
       let copiedFrom = null;
       for (const [pNum, pCode] of Object.entries(VAULT_DATABASE)) {
@@ -381,18 +357,15 @@
           break;
         }
       }
-
       inputs.forEach(i => { i.classList.remove('success'); i.classList.add('error'); });
       statusMsg.style.color = "#ef4444";
       if (copiedFrom) {
-        statusMsg.innerText = `🚫 INVALID KEY! (මෙම කේතය අයත් වන්නේ Paper Set ${copiedFrom} ටය. Copy කිරීමෙන් වලකින්න!)`;
+        statusMsg.innerText = `🚫 INVALID KEY! (මෙය Paper Set ${copiedFrom} හි කේතයකි. Copy කිරීමෙන් වලකින්න!)`;
       } else {
-        statusMsg.innerText = `❌ ACCESS DENIED! කේතය වැරදියි. නැවත උත්සාහ කරන්න.`;
+        statusMsg.innerText = `❌ ACCESS DENIED! කේතය වැරදියි. ගණනය කිරීම් නැවත බලන්න.`;
       }
       playErrorSound();
-      setTimeout(() => {
-        inputs.forEach(i => i.classList.remove('error'));
-      }, 1200);
+      setTimeout(() => { inputs.forEach(i => i.classList.remove('error')); }, 1200);
     }
   }
 
@@ -401,41 +374,26 @@
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-
     const pieces = [];
     const colors = ['#00ffcc', '#ffe600', '#ff007f', '#00b4d8', '#ffffff'];
-
     for (let i = 0; i < 140; i++) {
       pieces.push({
-        x: canvas.width / 2,
-        y: canvas.height / 2,
-        vx: (Math.random() - 0.5) * 20,
-        vy: (Math.random() - 0.5) * 20 - 5,
-        size: Math.random() * 8 + 4,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        rotation: Math.random() * 360,
-        rSpeed: (Math.random() - 0.5) * 10
+        x: canvas.width / 2, y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 20, vy: (Math.random() - 0.5) * 20 - 5,
+        size: Math.random() * 8 + 4, color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360, rSpeed: (Math.random() - 0.5) * 10
       });
     }
-
     function animate() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       let stillActive = false;
       pieces.forEach(p => {
-        p.x += p.vx;
-        p.y += p.vy;
-        p.vy += 0.35;
-        p.rotation += p.rSpeed;
+        p.x += p.vx; p.y += p.vy; p.vy += 0.35; p.rotation += p.rSpeed;
         if (p.y < canvas.height) stillActive = true;
-
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate((p.rotation * Math.PI) / 180);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
         ctx.restore();
       });
-
       if (stillActive) requestAnimationFrame(animate);
     }
     animate();
