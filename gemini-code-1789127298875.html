@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART ICT — Cyber Vault Terminal (AL 2028)</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background-color: #050811;
+    color: #e2e8f0;
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+  }
+  .grid-bg {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: 
+      linear-gradient(rgba(0, 255, 204, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 204, 0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .glow-orb {
+    position: absolute;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(0, 255, 204, 0.12) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .terminal-container {
+    position: relative;
+    z-index: 10;
+    width: 92%;
+    max-width: 560px;
+    background: rgba(11, 19, 36, 0.94);
+    border: 2px solid #00ffcc;
+    box-shadow: 0 0 35px rgba(0, 255, 204, 0.3), inset 0 0 20px rgba(0, 255, 204, 0.12);
+    border-radius: 14px;
+    padding: 32px 24px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+  }
+  .badge-header {
+    display: inline-block;
+    background: rgba(0, 255, 204, 0.15);
+    border: 1px solid #00ffcc;
+    color: #00ffcc;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .paper-indicator {
+    display: inline-block;
+    background: #ffe600;
+    color: #000;
+    font-family: 'Orbitron', monospace;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-left: 6px;
+    letter-spacing: 1px;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 2.5px;
+    color: #ffffff;
+    text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    color: #94a3b8;
+    font-size: 14.5px;
+    margin-bottom: 22px;
+    line-height: 1.4;
+  }
+  .selector-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    color: #cbd5e1;
+  }
+  .paper-select {
+    background: #060a14;
+    border: 1.5px solid #00ffcc;
+    color: #00ffcc;
+    font-family: 'Orbitron', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+  }
+  .inputs-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .code-input {
+    width: 52px;
+    height: 64px;
+    background: #060a12;
+    border: 2px solid #1e293b;
+    border-radius: 8px;
+    color: #00ffcc;
+    font-family: 'Orbitron', monospace;
+    font-size: 26px;
+    font-weight: 900;
+    text-align: center;
+    text-transform: uppercase;
+    transition: all 0.25s ease;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.6);
+  }
+  .code-input:focus {
+    outline: none;
+    border-color: #00ffcc;
+    box-shadow: 0 0 18px rgba(0, 255, 204, 0.5), inset 0 0 6px rgba(0, 255, 204, 0.3);
+    transform: translateY(-2px);
+  }
+  .code-input.error {
+    border-color: #ef4444;
+    color: #ef4444;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.5);
+    animation: shake 0.4s ease;
+  }
+  .code-input.success {
+    border-color: #22c55e;
+    color: #22c55e;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.6);
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+  }
+  .unlock-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #00ffcc 0%, #00b4d8 100%);
+    color: #050811;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 25px rgba(0, 255, 204, 0.35);
+  }
+  .unlock-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 35px rgba(0, 255, 204, 0.7);
+  }
+  .status-msg {
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 700;
+    min-height: 22px;
+    color: #64748b;
+  }
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+  }
+  .modal-card {
+    background: #0d1527;
+    border: 2px solid #ffe600;
+    box-shadow: 0 0 50px rgba(255, 230, 0, 0.45);
+    border-radius: 16px;
+    width: 90%;
+    max-width: 520px;
+    padding: 34px 24px;
+    text-align: center;
+    animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  @keyframes zoomIn {
+    from { opacity: 0; transform: scale(0.65); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  .trophy-icon {
+    font-size: 56px;
+    margin-bottom: 10px;
+    filter: drop-shadow(0 0 15px rgba(255, 230, 0, 0.6));
+  }
+  .modal-card h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: #ffe600;
+    font-size: 22px;
+    margin-bottom: 8px;
+    letter-spacing: 1.5px;
+  }
+  .modal-card p {
+    color: #cbd5e1;
+    font-size: 15px;
+    line-height: 1.55;
+    margin-bottom: 18px;
+  }
+  .passcode-pill {
+    display: inline-block;
+    background: rgba(255, 230, 0, 0.15);
+    border: 1.5px solid #ffe600;
+    color: #ffe600;
+    font-family: 'Orbitron', monospace;
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 6px;
+    padding: 6px 18px;
+    border-radius: 30px;
+    margin-bottom: 16px;
+  }
+  .brand-footer {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 12px;
+  }
+  #confetti-canvas {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 150;
+  }
+</style>
+</head>
+<body>
+
+  <div class="grid-bg"></div>
+  <div class="glow-orb"></div>
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="terminal-container">
+    <div class="badge-header">
+      ⚡ SMART ICT &bull; AL 2028 TERMINAL
+      <span class="paper-indicator" id="paper-indicator">SET 01</span>
+    </div>
+    
+    <h1>CYBER VAULT LOCK</h1>
+    <div class="subtitle">Enter the 6-character Number System Key from your Paper:</div>
+
+    <div class="selector-row" id="selector-row">
+      <label for="paper-select">Your Paper Number:</label>
+      <select id="paper-select" class="paper-select" onchange="changePaper(this.value)">
+      </select>
+    </div>
+
+    <div class="inputs-row">
+      <input type="text" maxlength="1" class="code-input" data-index="0" autofocus>
+      <input type="text" maxlength="1" class="code-input" data-index="1">
+      <input type="text" maxlength="1" class="code-input" data-index="2">
+      <input type="text" maxlength="1" class="code-input" data-index="3">
+      <input type="text" maxlength="1" class="code-input" data-index="4">
+      <input type="text" maxlength="1" class="code-input" data-index="5">
+    </div>
+
+    <button class="unlock-btn" onclick="checkCode()">🔓 UNLOCK VAULT</button>
+    <div class="status-msg" id="status-msg">AWAITING 6-DIGIT PASSCODE...</div>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-card">
+      <div class="trophy-icon">🏆✨</div>
+      <h2>VAULT UNLOCKED!</h2>
+      <div class="passcode-pill" id="revealed-code">CAFE28</div>
+      <p>
+        විශිෂ්ටයි! ඔබ <strong>Yellow Paper <span id="solved-set-title">01</span> (Number System 20-Questions Challenge)</strong> සාර්ථකව විසඳා Cyber Vault එක Unlock කර ඇත!<br><br>
+        <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථයක්</strong> කරා යන ඔබේ ගමනට #smart_ict වෙතින් උණුසුම් සුබ පැතුම්! 🚀
+      </p>
+      <div class="brand-footer">Pasan Ruhunage &nbsp;|&nbsp; #smart_ict &nbsp;|&nbsp; Master Series 2028</div>
+    </div>
+  </div>
+
+<script>
+  const VAULT_DATABASE = {"01": "CAFE28", "02": "BEEF28", "03": "FACE28", "04": "BABE28", "05": "DEAD28", "06": "FEED28", "07": "CODE28", "08": "A5BE28", "09": "C00L28", "10": "B05528", "11": "ACDC28", "12": "FADE28", "13": "DAF028", "14": "133728", "15": "8A8E28", "16": "DEED28", "17": "BEAD28", "18": "ACED28", "19": "2028EF", "20": "2028A1"};
+
+  let currentPaper = "01";
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramPaper = urlParams.get('p') || urlParams.get('paper');
+
+  const paperSelect = document.getElementById('paper-select');
+  const paperIndicator = document.getElementById('paper-indicator');
+  const selectorRow = document.getElementById('selector-row');
+  const inputs = document.querySelectorAll('.code-input');
+  const statusMsg = document.getElementById('status-msg');
+  const modalOverlay = document.getElementById('modal-overlay');
+  const revealedCode = document.getElementById('revealed-code');
+  const solvedSetTitle = document.getElementById('solved-set-title');
+
+  for (let i = 1; i <= 20; i++) {
+    const key = String(i).padStart(2, '0');
+    const opt = document.createElement('option');
+    opt.value = key;
+    opt.innerText = `Paper Set ${key}`;
+    paperSelect.appendChild(opt);
+  }
+
+  if (paramPaper) {
+    const cleanParam = String(parseInt(paramPaper)).padStart(2, '0');
+    if (VAULT_DATABASE[cleanParam]) {
+      currentPaper = cleanParam;
+      paperSelect.value = cleanParam;
+      selectorRow.style.display = 'none';
+    }
+  }
+
+  function updatePaperDisplay() {
+    paperIndicator.innerText = `SET ${currentPaper}`;
+    statusMsg.style.color = "#64748b";
+    statusMsg.innerText = `AWAITING 6-DIGIT KEY FOR SET ${currentPaper}...`;
+    inputs.forEach(i => { i.value = ''; i.classList.remove('error', 'success'); });
+    inputs[0].focus();
+  }
+  updatePaperDisplay();
+
+  function changePaper(val) {
+    currentPaper = val;
+    updatePaperDisplay();
+  }
+
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  function playBeep(freq, type, duration) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function playSuccessSound() {
+    playBeep(523.25, 'sine', 0.15);
+    setTimeout(() => playBeep(659.25, 'sine', 0.15), 120);
+    setTimeout(() => playBeep(783.99, 'sine', 0.15), 240);
+    setTimeout(() => playBeep(1046.50, 'triangle', 0.5), 360);
+  }
+
+  function playErrorSound() {
+    playBeep(220, 'sawtooth', 0.3);
+    setTimeout(() => playBeep(180, 'sawtooth', 0.3), 150);
+  }
+
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', (e) => {
+      input.value = input.value.toUpperCase();
+      playBeep(440 + index * 50, 'sine', 0.05);
+      if (input.value && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+      if (index === inputs.length - 1 && input.value) {
+        checkCode();
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && index > 0) {
+        inputs[index - 1].focus();
+      } else if (e.key === 'Enter') {
+        checkCode();
+      }
+    });
+  });
+
+  function checkCode() {
+    let enteredCode = "";
+    inputs.forEach(input => enteredCode += input.value.trim().toUpperCase());
+
+    if (enteredCode.length < 6) {
+      statusMsg.style.color = "#f59e0b";
+      statusMsg.innerText = "⚠️ කරුණාකර අගයන් 6 ම සම්පූර්ණ කරන්න!";
+      return;
+    }
+
+    const correctForThisPaper = VAULT_DATABASE[currentPaper];
+
+    if (enteredCode === correctForThisPaper) {
+      inputs.forEach(i => { i.classList.remove('error'); i.classList.add('success'); });
+      statusMsg.style.color = "#22c55e";
+      statusMsg.innerText = "ACCESS GRANTED! UNLOCKING VAULT...";
+      revealedCode.innerText = enteredCode;
+      solvedSetTitle.innerText = currentPaper;
+      playSuccessSound();
+      launchConfetti();
+      setTimeout(() => {
+        modalOverlay.style.display = 'flex';
+      }, 650);
+    } else {
+      let copiedFrom = null;
+      for (const [pNum, pCode] of Object.entries(VAULT_DATABASE)) {
+        if (pCode === enteredCode && pNum !== currentPaper) {
+          copiedFrom = pNum;
+          break;
+        }
+      }
+
+      inputs.forEach(i => { i.classList.remove('success'); i.classList.add('error'); });
+      statusMsg.style.color = "#ef4444";
+      if (copiedFrom) {
+        statusMsg.innerText = `🚫 INVALID KEY! (මෙම කේතය අයත් වන්නේ Paper Set ${copiedFrom} ටය. Copy කිරීමෙන් වලකින්න!)`;
+      } else {
+        statusMsg.innerText = `❌ ACCESS DENIED! කේතය වැරදියි. නැවත උත්සාහ කරන්න.`;
+      }
+      playErrorSound();
+      setTimeout(() => {
+        inputs.forEach(i => i.classList.remove('error'));
+      }, 1200);
+    }
+  }
+
+  function launchConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const pieces = [];
+    const colors = ['#00ffcc', '#ffe600', '#ff007f', '#00b4d8', '#ffffff'];
+
+    for (let i = 0; i < 140; i++) {
+      pieces.push({
+        x: canvas.width / 2,
+        y: canvas.height / 2,
+        vx: (Math.random() - 0.5) * 20,
+        vy: (Math.random() - 0.5) * 20 - 5,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        rotation: Math.random() * 360,
+        rSpeed: (Math.random() - 0.5) * 10
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let stillActive = false;
+      pieces.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.35;
+        p.rotation += p.rSpeed;
+        if (p.y < canvas.height) stillActive = true;
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+        ctx.restore();
+      });
+
+      if (stillActive) requestAnimationFrame(animate);
+    }
+    animate();
+  }
+</script>
+</body>
+</html>
