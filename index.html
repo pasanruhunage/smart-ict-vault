@@ -205,7 +205,7 @@ body {
   </div>
   <button class="unlock-btn" onclick="checkCode()">&#128275; UNLOCK VAULT</button>
   <div class="status-msg" id="status-msg">AWAITING 16-DIGIT PASSCODE...</div>
-  <button class="mode-toggle-btn" onclick="switchToProjector()">&#127909; PROJECTOR LIVE VIEW &nbsp;|&nbsp; Teacher Mode</button>
+  <!-- Projector accessible via ?live=1 URL only (hidden from students) -->
 </div>
 
 <!-- ======== PROJECTOR VIEW ======== -->
@@ -286,6 +286,9 @@ const VAULT_DATABASE = {
   "19":"2028EFBEEFCAFE01","20":"2028A1FACEFEED02"
 };
 
+// Fixed order 01→20 (Object.keys gives wrong order due to JS integer-key sorting)
+const SET_ORDER = ["01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20"];
+
 const MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
 const MQTT_TOPIC  = "smart-ict-vault-2028-fw02/set/";
 
@@ -299,7 +302,7 @@ let unlockedCount = 0;
 let leaderboard = [];
 
 const setStates = {};
-for (const k of Object.keys(VAULT_DATABASE)) {
+for (const k of SET_ORDER) {
   setStates[k] = { filledCount: 0, status: "locked" };
 }
 
@@ -330,6 +333,12 @@ resizeBG(); window.addEventListener('resize', resizeBG);
 const HC = '0123456789ABCDEF'; const FS = 14;
 let drops = [];
 function drawMatrix() {
+  // Skip animation in projector mode — solid dark bg only
+  if (isProjectorMode) {
+    bgCtx.fillStyle = '#020612';
+    bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+    return;
+  }
   const cols = Math.floor(bgCanvas.width / FS);
   if (drops.length !== cols) drops = Array(cols).fill(1);
   bgCtx.fillStyle = 'rgba(2,6,18,0.07)';
@@ -487,7 +496,7 @@ function projectorCelebrate(s, rank) {
 function buildGrid() {
   const grid = document.getElementById('proj-grid');
   grid.innerHTML = '';
-  for (const s of Object.keys(VAULT_DATABASE)) {
+  for (const s of SET_ORDER) {
     const card = document.createElement('div');
     card.className = 'set-card'; card.id = 'card-' + s;
     const slots = Array(16).fill(0).map((_,i)=>`<div class="slot-dot" id="slot-${s}-${i+1}"></div>`).join('');
