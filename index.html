@@ -180,8 +180,53 @@ body {
 .proj-winner-modal { display:none; position:fixed; inset:0; z-index:190; justify-content:center; align-items:center; background:rgba(0,0,0,0.72); backdrop-filter:blur(8px); }
 .proj-winner-card { background:#050e1f; border:2px solid #22c55e; box-shadow:0 0 80px rgba(34,197,94,0.5); border-radius:20px; padding:36px 32px; text-align:center; animation:zoomIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); min-width:360px; max-width:90vw; }
 .proj-winner-card h2 { font-family:'Orbitron',sans-serif; color:#22c55e; font-size:28px; margin-bottom:12px; }
-.proj-winner-card p { color:#cbd5e1; font-size:16px; margin-bottom:8px; }
-.proj-winner-rank { font-family:'Orbitron',sans-serif; font-size:52px; margin-bottom:10px; }
+/* Start Screen Overlay */
+.start-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: radial-gradient(circle at center, rgba(5,14,35,0.98) 0%, rgba(2,6,18,0.99) 100%);
+  display: flex; justify-content: center; align-items: center;
+  backdrop-filter: blur(12px);
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+.start-overlay.hidden {
+  opacity: 0; visibility: hidden; pointer-events: none;
+}
+.start-card {
+  text-align: center; padding: 42px 36px;
+  background: rgba(8, 20, 44, 0.85);
+  border: 2px solid #00ffcc;
+  box-shadow: 0 0 50px rgba(0,255,204,0.35), inset 0 0 25px rgba(0,255,204,0.1);
+  border-radius: 20px; max-width: 520px; width: 92%;
+  animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.start-badge {
+  font-family: 'Orbitron', monospace; font-size: 11px; font-weight: 800;
+  color: #ffe600; letter-spacing: 2px; margin-bottom: 12px;
+  text-transform: uppercase;
+}
+.start-title {
+  font-family: 'Orbitron', sans-serif; font-size: 26px; font-weight: 900;
+  color: #fff; letter-spacing: 2px; margin-bottom: 8px;
+  text-shadow: 0 0 16px rgba(0,255,204,0.6);
+}
+.start-subtitle {
+  color: #94a3b8; font-size: 15px; margin-bottom: 28px; line-height: 1.5;
+}
+.start-btn {
+  background: linear-gradient(135deg, #00ffcc 0%, #00b4d8 100%);
+  color: #020612; border: none; outline: none;
+  font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900;
+  letter-spacing: 2px; padding: 16px 42px; border-radius: 35px;
+  cursor: pointer; box-shadow: 0 0 30px rgba(0,255,204,0.6);
+  transition: all 0.25s ease; display: inline-flex; align-items: center; gap: 10px;
+}
+.start-btn:hover {
+  transform: scale(1.06); box-shadow: 0 0 45px rgba(0,255,204,0.9);
+}
+.start-btn:active { transform: scale(0.98); }
+.start-hint {
+  margin-top: 20px; font-size: 12px; color: #64748b; font-family: 'Share Tech Mono', monospace;
+}
 </style>
 </head>
 <body>
@@ -190,6 +235,19 @@ body {
 <div class="glow-ring"></div>
 <canvas id="confetti-canvas"></canvas>
 <div class="unlock-flash" id="unlock-flash"></div>
+
+<!-- ======== START SCREEN OVERLAY ======== -->
+<div class="start-overlay" id="start-overlay">
+  <div class="start-card">
+    <div class="start-badge">&#9889; SMART ICT &bull; PASAN RUHUNAGE</div>
+    <div class="start-title">&#128272; CYBER VAULT TERMINAL</div>
+    <div class="start-subtitle">FastTrack Warriors &mdash; Live Monitoring &amp; Challenge System<br>Ready to initialize mainframe audio &amp; sync?</div>
+    <button class="start-btn" id="start-btn" onclick="startVaultExperience()">
+      <span>&#9654; START</span>
+    </button>
+    <div class="start-hint">&#127925; Press START to launch terminal with sound &amp; music</div>
+  </div>
+</div>
 
 <!-- ======== STUDENT VIEW ======== -->
 <div id="student-view">
@@ -215,6 +273,7 @@ body {
     <div class="proj-title">&#128272; FASTTRACK WARRIORS &mdash; LIVE VAULT MONITOR</div>
     <div class="proj-controls">
       <div class="stat-pill"><span id="conn-dot"></span><span id="conn-label">CONNECTING...</span></div>
+      <button class="proj-btn" onclick="toggleBGM()" id="bgm-btn">&#127925; MUSIC ON</button>
       <button class="proj-btn" onclick="toggleSound()" id="sound-btn">&#128265; SOUND ON</button>
       <button class="proj-btn" onclick="toggleFullscreen()">&#9974; FULLSCREEN</button>
       <button class="proj-btn danger" onclick="resetSession()">&#8634; RESET</button>
@@ -307,21 +366,17 @@ for (const k of SET_ORDER) {
 }
 
 /* =============================================
-   ROUTING
+   ROUTING (Awaiting user to click START)
 ============================================= */
 const urlParams = new URLSearchParams(window.location.search);
 const paramPaper = urlParams.get('p') || urlParams.get('paper');
 const paramLive  = urlParams.get('live') || urlParams.get('projector') || urlParams.get('teacher');
 
-if (paramLive) {
-  startProjectorMode();
-} else {
-  if (paramPaper) {
-    const clean = String(parseInt(paramPaper)).padStart(2,'0');
-    if (VAULT_DATABASE[clean]) currentPaper = clean;
-  }
-  startStudentMode();
+if (paramPaper) {
+  const clean = String(parseInt(paramPaper)).padStart(2,'0');
+  if (VAULT_DATABASE[clean]) currentPaper = clean;
 }
+// Terminal will be loaded once START button is clicked to unlock WebAudio and full experience!
 
 /* =============================================
    BACKGROUND MATRIX
@@ -353,31 +408,170 @@ function drawMatrix() {
 setInterval(drawMatrix, 40);
 
 /* =============================================
-   AUDIO
+   AUDIO ENGINE & BACKGROUND MUSIC
 ============================================= */
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+let bgmPlaying = false;
+let bgmInterval = null;
+let bgmStep = 0;
+
+// Cyberpunk / Tech chill melody notes (frequencies in Hz)
+const BGM_BASS = [110, 110, 130.81, 130.81, 98, 98, 123.47, 123.47]; // A2, C3, G2, B2
+const BGM_LEAD = [
+  440, 523.25, 659.25, 587.33, 523.25, 440, 392, 440,
+  523.25, 659.25, 783.99, 659.25, 587.33, 523.25, 493.88, 440
+];
+
 function playSynth(freq, type, dur, vol=0.15) {
   if (!soundEnabled) return;
   if (audioCtx.state === 'suspended') audioCtx.resume();
-  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-  o.type = type; o.frequency.value = freq;
-  g.gain.setValueAtTime(vol, audioCtx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
-  o.connect(g); g.connect(audioCtx.destination);
-  o.start(); o.stop(audioCtx.currentTime + dur);
+  try {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  } catch(e) {}
 }
+
+function startBGM() {
+  if (bgmPlaying) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  bgmPlaying = true;
+  const btn = document.getElementById('bgm-btn');
+  if (btn) btn.textContent = '🎵 MUSIC ON';
+  
+  bgmStep = 0;
+  if (bgmInterval) clearInterval(bgmInterval);
+  bgmInterval = setInterval(() => {
+    if (!bgmPlaying || !soundEnabled) return;
+    
+    // Bass note every 2 steps
+    if (bgmStep % 2 === 0) {
+      const bFreq = BGM_BASS[(bgmStep / 2) % BGM_BASS.length];
+      playSynth(bFreq, 'triangle', 0.45, 0.09);
+    }
+    
+    // Ambient lead arpeggio
+    const lFreq = BGM_LEAD[bgmStep % BGM_LEAD.length];
+    if (bgmStep % 4 === 0 || bgmStep % 4 === 2 || Math.random() > 0.4) {
+      playSynth(lFreq, 'sine', 0.22, 0.05);
+    }
+    
+    // Soft high cyber tick
+    if (bgmStep % 4 === 2) {
+      playSynth(1760, 'sine', 0.05, 0.015);
+    }
+
+    bgmStep = (bgmStep + 1) % 64;
+  }, 240); // ~125 BPM 8th-note pulse
+}
+
+function stopBGM() {
+  bgmPlaying = false;
+  if (bgmInterval) {
+    clearInterval(bgmInterval);
+    bgmInterval = null;
+  }
+  const btn = document.getElementById('bgm-btn');
+  if (btn) btn.textContent = '🔇 MUSIC OFF';
+}
+
+function toggleBGM() {
+  if (bgmPlaying) {
+    stopBGM();
+  } else {
+    startBGM();
+  }
+}
+
+/* Master Vault Unlock Breach Tone */
+function playVaultBreachSound() {
+  if (!soundEnabled) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  
+  // 1. Power rising cyber sweep
+  try {
+    const sweepOsc = audioCtx.createOscillator();
+    const sweepGain = audioCtx.createGain();
+    sweepOsc.type = 'sawtooth';
+    sweepOsc.frequency.setValueAtTime(140, audioCtx.currentTime);
+    sweepOsc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.35);
+    sweepGain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+    sweepGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.4);
+    sweepOsc.connect(sweepGain); sweepGain.connect(audioCtx.destination);
+    sweepOsc.start(); sweepOsc.stop(audioCtx.currentTime + 0.4);
+  } catch(e) {}
+
+  // 2. Victory Major Chords & Fanfare (C5 -> E5 -> G5 -> C6 -> E6)
+  const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+  notes.forEach((freq, idx) => {
+    setTimeout(() => {
+      playSynth(freq, 'triangle', 0.55, 0.28);
+      playSynth(freq * 0.5, 'sine', 0.55, 0.18); // rich sub octave
+    }, 160 + idx * 95);
+  });
+
+  // 3. Resonant Grand Shimmer
+  setTimeout(() => {
+    [1046.50, 1318.51, 1567.98, 2093.00].forEach(f => {
+      playSynth(f, 'sine', 0.9, 0.12);
+    });
+  }, 680);
+}
+
 function playSuccessSound() {
-  playSynth(440,'sine',0.1); setTimeout(()=>playSynth(554,'sine',0.1),80);
-  setTimeout(()=>playSynth(659,'sine',0.1),160); setTimeout(()=>playSynth(880,'triangle',0.5),240);
+  playVaultBreachSound();
 }
+
 function playFanfare() {
-  [523,587,659,784,880,1047].forEach((n,i)=>setTimeout(()=>playSynth(n,'triangle',0.4,0.25),i*110));
+  playVaultBreachSound();
 }
+
 function playBlip(idx) { playSynth(350+idx*25,'sine',0.04,0.08); }
 function playBuzz() { playSynth(150,'sawtooth',0.35,0.2); }
+
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  document.getElementById('sound-btn').textContent = soundEnabled ? '\uD83D\uDD0A SOUND ON' : '\uD83D\uDD07 MUTE';
+  document.getElementById('sound-btn').textContent = soundEnabled ? '🔊 SOUND ON' : '🔇 MUTE';
+  if (!soundEnabled && bgmPlaying) {
+    stopBGM();
+  } else if (soundEnabled && !bgmPlaying) {
+    startBGM();
+  }
+}
+
+/* START BUTTON HANDLER */
+function startVaultExperience() {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  // Audio startup chime
+  playSynth(523.25, 'sine', 0.15, 0.2);
+  setTimeout(() => playSynth(659.25, 'sine', 0.15, 0.2), 100);
+  setTimeout(() => playSynth(783.99, 'sine', 0.35, 0.25), 200);
+
+  // Hide start overlay with smooth fade
+  const overlay = document.getElementById('start-overlay');
+  if (overlay) overlay.classList.add('hidden');
+
+  // Start background music
+  startBGM();
+
+  // Route to the appropriate view
+  const p = new URLSearchParams(window.location.search);
+  const isLive = p.get('live') || p.get('projector') || p.get('teacher');
+  if (isLive) {
+    startProjectorMode();
+  } else {
+    const pp = p.get('p') || p.get('paper');
+    if (pp) {
+      const clean = String(parseInt(pp)).padStart(2,'0');
+      if (VAULT_DATABASE[clean]) currentPaper = clean;
+    }
+    startStudentMode();
+  }
 }
 
 /* =============================================
