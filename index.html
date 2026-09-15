@@ -1,533 +1,736 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>PASAN RUHUNAGE — Cyber Vault Terminal (AL 2028)</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background-color: #020612;
-    color: #e2e8f0;
-    font-family: 'Rajdhani', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow-x: hidden;
-    position: relative;
-  }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background-color: #020612;
+  color: #e2e8f0;
+  font-family: 'Rajdhani', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  position: relative;
+}
+#bg-canvas { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; }
+#confetti-canvas { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:200; }
+.glow-ring {
+  position:fixed; width:700px; height:700px;
+  background:radial-gradient(circle,rgba(0,255,204,0.10) 0%,transparent 70%);
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  z-index:1; pointer-events:none;
+  animation:pulseGlow 4s ease-in-out infinite alternate;
+}
+@keyframes pulseGlow {
+  0%{transform:translate(-50%,-50%) scale(0.9);opacity:0.6;}
+  100%{transform:translate(-50%,-50%) scale(1.15);opacity:1;}
+}
 
-  #bg-canvas {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    z-index: 0;
-    pointer-events: none;
-  }
+/* ---- STUDENT VIEW ---- */
+#student-view {
+  position:relative; z-index:10;
+  width:95%; max-width:700px;
+  background:rgba(8,15,30,0.94);
+  border:2px solid #00ffcc;
+  box-shadow:0 0 40px rgba(0,255,204,0.35),inset 0 0 20px rgba(0,255,204,0.12);
+  border-radius:16px; padding:28px 22px;
+  text-align:center; backdrop-filter:blur(14px);
+}
+.brand-header {
+  display:flex; justify-content:space-between; align-items:center;
+  border-bottom:1px solid rgba(0,255,204,0.25);
+  padding-bottom:10px; margin-bottom:14px;
+}
+.teacher-name { font-family:'Orbitron',monospace; font-size:13px; font-weight:900; color:#00ffcc; letter-spacing:2px; text-shadow:0 0 10px rgba(0,255,204,0.5); }
+.paper-indicator { background:#ffe600; color:#000; font-family:'Orbitron',monospace; font-size:11px; font-weight:900; padding:3px 10px; border-radius:4px; letter-spacing:1px; }
+#student-view h1 { font-family:'Orbitron',sans-serif; font-size:24px; font-weight:900; letter-spacing:2px; color:#fff; text-shadow:0 0 15px rgba(0,255,204,0.6); margin-bottom:4px; }
+.subtitle { color:#94a3b8; font-size:14px; margin-bottom:18px; }
+.inputs-container { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+.inputs-row { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }
+.code-input {
+  width:40px; height:50px;
+  background:#040814; border:2px solid #1e293b; border-radius:6px;
+  color:#00ffcc; font-family:'Orbitron',monospace; font-size:19px;
+  font-weight:900; text-align:center; text-transform:uppercase; transition:all 0.2s ease;
+}
+.code-input:focus { outline:none; border-color:#00ffcc; box-shadow:0 0 14px rgba(0,255,204,0.6); transform:translateY(-2px); }
+.code-input.error { border-color:#ef4444; color:#ef4444; box-shadow:0 0 14px rgba(239,68,68,0.6); animation:shake 0.4s ease; }
+.code-input.success { border-color:#22c55e; color:#22c55e; box-shadow:0 0 14px rgba(34,197,94,0.7); }
+@keyframes shake { 0%,100%{transform:translateX(0);} 20%,60%{transform:translateX(-4px);} 40%,80%{transform:translateX(4px);} }
+.unlock-btn {
+  width:100%; background:linear-gradient(135deg,#00ffcc 0%,#00b4d8 100%);
+  color:#050811; font-family:'Orbitron',sans-serif; font-size:15px; font-weight:900;
+  letter-spacing:2px; padding:13px 20px; border:none; border-radius:8px;
+  cursor:pointer; box-shadow:0 0 25px rgba(0,255,204,0.35); transition:all 0.25s ease;
+}
+.unlock-btn:hover { transform:translateY(-2px); box-shadow:0 0 35px rgba(0,255,204,0.65); }
+.status-msg { margin-top:14px; font-size:13.5px; font-weight:700; min-height:20px; color:#64748b; }
+.mode-toggle-btn {
+  margin-top:16px; width:100%;
+  background:rgba(0,255,204,0.08); color:#00ffcc;
+  border:1px solid rgba(0,255,204,0.3); font-family:'Orbitron',monospace;
+  font-size:11px; padding:9px 10px; border-radius:8px; cursor:pointer;
+  letter-spacing:1px; transition:all 0.2s;
+}
+.mode-toggle-btn:hover { background:rgba(0,255,204,0.16); }
 
-  .glow-ring {
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(0, 255, 204, 0.14) 0%, rgba(0, 180, 216, 0.06) 50%, transparent 70%);
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    pointer-events: none;
-    animation: pulseGlow 4s ease-in-out infinite alternate;
-  }
+/* ---- HACK SCREEN ---- */
+.hack-screen {
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.95); z-index:120; color:#00ffcc;
+  font-family:'Share Tech Mono',monospace; font-size:16px; padding:40px;
+  flex-direction:column; justify-content:center; align-items:center;
+}
 
-  @keyframes pulseGlow {
-    0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
-    100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-  }
+/* ---- SUCCESS MODAL ---- */
+.modal-overlay {
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.92); z-index:150;
+  justify-content:center; align-items:center; backdrop-filter:blur(12px);
+}
+.modal-card {
+  background:#091122; border:2px solid #ffe600;
+  box-shadow:0 0 60px rgba(255,230,0,0.5),inset 0 0 20px rgba(255,230,0,0.1);
+  border-radius:18px; width:92%; max-width:560px;
+  padding:32px 24px; text-align:center;
+  animation:zoomIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes zoomIn { from{opacity:0;transform:scale(0.6);}  to{opacity:1;transform:scale(1);} }
+.trophy-icon { font-size:56px; margin-bottom:8px; filter:drop-shadow(0 0 20px rgba(255,230,0,0.8)); }
+.rank-badge { display:inline-block; background:linear-gradient(90deg,#ff007f,#7928ca); color:#fff; font-family:'Orbitron',monospace; font-size:11px; font-weight:900; padding:4px 12px; border-radius:20px; letter-spacing:1.5px; margin-bottom:12px; }
+.modal-card h2 { font-family:'Orbitron',sans-serif; color:#ffe600; font-size:22px; margin-bottom:8px; }
+.modal-card p { color:#cbd5e1; font-size:14.5px; line-height:1.55; margin-bottom:16px; }
+.easter-egg-box { background:rgba(0,255,204,0.08); border:1px dashed #00ffcc; border-radius:8px; padding:12px; font-size:13.5px; color:#00ffcc; margin-bottom:16px; font-family:'Share Tech Mono',monospace; }
+.brand-footer { color:#64748b; font-size:12.5px; font-weight:600; }
+.close-modal-btn { margin-top:16px; padding:10px 24px; background:rgba(255,230,0,0.12); border:1px solid #ffe600; color:#ffe600; border-radius:8px; cursor:pointer; font-family:'Orbitron',monospace; font-size:12px; }
 
-  .terminal-container {
-    position: relative;
-    z-index: 10;
-    width: 95%;
-    max-width: 700px;
-    background: rgba(8, 15, 30, 0.94);
-    border: 2px solid #00ffcc;
-    box-shadow: 0 0 40px rgba(0, 255, 204, 0.35), inset 0 0 20px rgba(0, 255, 204, 0.12);
-    border-radius: 16px;
-    padding: 28px 22px;
-    text-align: center;
-    backdrop-filter: blur(14px);
-  }
+/* ---- PROJECTOR VIEW ---- */
+#projector-view {
+  display:none; position:relative; z-index:10;
+  width:100%; min-height:100vh; padding:10px 14px 14px;
+  flex-direction:column;
+}
+.proj-topbar {
+  display:flex; justify-content:space-between; align-items:center;
+  border-bottom:2px solid #00ffcc;
+  padding-bottom:8px; margin-bottom:12px; flex-wrap:wrap; gap:8px;
+}
+.proj-brand { font-family:'Orbitron',monospace; font-size:13px; font-weight:900; color:#00ffcc; letter-spacing:2px; }
+.proj-title { font-family:'Orbitron',monospace; font-size:14px; font-weight:900; color:#fff; letter-spacing:2px; }
+.proj-controls { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.proj-btn { background:rgba(0,255,204,0.08); border:1px solid rgba(0,255,204,0.35); color:#00ffcc; font-family:'Orbitron',monospace; font-size:10px; padding:6px 10px; border-radius:6px; cursor:pointer; letter-spacing:1px; transition:all 0.2s; }
+.proj-btn:hover { background:rgba(0,255,204,0.2); }
+.proj-btn.danger { border-color:rgba(239,68,68,0.4); color:#ef4444; background:rgba(239,68,68,0.07); }
+.proj-btn.danger:hover { background:rgba(239,68,68,0.18); }
+.proj-stats { display:flex; gap:14px; margin-bottom:10px; flex-wrap:wrap; align-items:center; }
+.stat-pill { background:rgba(0,255,204,0.07); border:1px solid rgba(0,255,204,0.2); border-radius:20px; padding:4px 14px; font-family:'Share Tech Mono',monospace; font-size:12px; color:#00ffcc; }
+.stat-pill span { color:#fff; font-weight:700; }
+#conn-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#ef4444; margin-right:5px; transition:background 0.4s; box-shadow:0 0 6px #ef4444; }
+#conn-dot.online { background:#22c55e; box-shadow:0 0 8px #22c55e; }
+.proj-leaderboard { background:rgba(0,0,0,0.4); border:1px solid rgba(255,230,0,0.25); border-radius:10px; padding:8px 14px; margin-bottom:10px; font-family:'Share Tech Mono',monospace; font-size:12px; color:#94a3b8; min-height:34px; }
+.lb-label { color:#ffe600; font-weight:700; margin-right:8px; }
+.lb-entry { display:inline-block; margin-right:16px; }
+.lb-set { color:#fff; font-weight:700; }
+.lb-time { color:#64748b; }
 
-  .brand-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid rgba(0, 255, 204, 0.25);
-    padding-bottom: 10px;
-    margin-bottom: 14px;
-  }
+/* 20-Set Grid */
+.proj-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:8px; flex:1; }
+@media(max-width:1100px){ .proj-grid{grid-template-columns:repeat(4,1fr);} }
+@media(max-width:800px){ .proj-grid{grid-template-columns:repeat(3,1fr);} }
+@media(max-width:560px){ .proj-grid{grid-template-columns:repeat(2,1fr);} }
 
-  .teacher-name {
-    font-family: 'Orbitron', monospace;
-    font-size: 13px;
-    font-weight: 900;
-    color: #00ffcc;
-    letter-spacing: 2px;
-    text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-  }
+.set-card { background:rgba(5,12,28,0.9); border:1.5px solid rgba(0,255,204,0.22); border-radius:10px; padding:10px 8px; text-align:center; transition:border-color 0.3s,box-shadow 0.3s; }
+.set-card.typing { border-color:rgba(255,230,0,0.6); box-shadow:0 0 12px rgba(255,230,0,0.2); }
+.set-card.unlocked { border-color:#22c55e; box-shadow:0 0 20px rgba(34,197,94,0.4); animation:unlockedPulse 1.5s ease-in-out 3; }
+.set-card.denied { border-color:rgba(239,68,68,0.6); box-shadow:0 0 12px rgba(239,68,68,0.25); }
+@keyframes unlockedPulse { 0%,100%{box-shadow:0 0 20px rgba(34,197,94,0.4);} 50%{box-shadow:0 0 45px rgba(34,197,94,0.85);} }
+.set-card-header { font-family:'Orbitron',monospace; font-size:12px; font-weight:900; color:#00ffcc; margin-bottom:6px; letter-spacing:1px; display:flex; justify-content:space-between; align-items:center; }
+.set-status-badge { font-size:9px; padding:2px 6px; border-radius:10px; letter-spacing:0.5px; background:rgba(0,255,204,0.1); color:#64748b; border:1px solid rgba(0,255,204,0.15); transition:all 0.3s; }
+.set-status-badge.typing { background:rgba(255,230,0,0.15); color:#ffe600; border-color:rgba(255,230,0,0.4); }
+.set-status-badge.unlocked { background:rgba(34,197,94,0.2); color:#22c55e; border-color:#22c55e; }
+.set-status-badge.denied { background:rgba(239,68,68,0.15); color:#ef4444; border-color:rgba(239,68,68,0.4); }
 
-  .paper-indicator {
-    background: #ffe600;
-    color: #000;
-    font-family: 'Orbitron', monospace;
-    font-size: 11px;
-    font-weight: 900;
-    padding: 3px 10px;
-    border-radius: 4px;
-    letter-spacing: 1px;
-  }
+/* 16 masked slots */
+.slot-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; margin-bottom:6px; }
+.slot-dot { height:22px; border-radius:4px; background:rgba(0,255,204,0.06); border:1px solid rgba(0,255,204,0.12); display:flex; align-items:center; justify-content:center; font-family:'Orbitron',monospace; font-size:10px; color:rgba(0,255,204,0.25); transition:all 0.15s; }
+.slot-dot.filled { background:rgba(0,255,204,0.14); border-color:rgba(0,255,204,0.45); }
+.slot-dot.filled::after { content:'●'; font-size:9px; color:#00ffcc; text-shadow:0 0 6px #00ffcc; }
+.slot-dot.unlocked-slot { background:rgba(34,197,94,0.2); border-color:#22c55e; }
+.slot-dot.unlocked-slot::after { content:'✓'; font-size:10px; color:#22c55e; text-shadow:0 0 6px #22c55e; }
+.slot-dot.denied-slot { background:rgba(239,68,68,0.15); border-color:rgba(239,68,68,0.4); }
+.slot-dot.denied-slot::after { content:'✗'; font-size:10px; color:#ef4444; }
+.set-rank-tag { font-family:'Orbitron',monospace; font-size:9px; font-weight:900; min-height:16px; color:#ffe600; letter-spacing:1px; }
+.proj-student-btn { margin-top:10px; background:rgba(0,255,204,0.07); border:1px solid rgba(0,255,204,0.3); color:#00ffcc; border-radius:8px; cursor:pointer; font-family:'Orbitron',monospace; font-size:10px; padding:7px 12px; letter-spacing:1px; align-self:flex-start; transition:all 0.2s; }
+.proj-student-btn:hover { background:rgba(0,255,204,0.15); }
 
-  h1 {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 24px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    color: #ffffff;
-    text-shadow: 0 0 15px rgba(0, 255, 204, 0.6);
-    margin-bottom: 4px;
-  }
+/* Unlock flash */
+.unlock-flash { display:none; position:fixed; inset:0; z-index:180; background:radial-gradient(circle,rgba(34,197,94,0.45) 0%,transparent 70%); pointer-events:none; }
+.unlock-flash.active { display:block; animation:flashFade 1.2s forwards; }
+@keyframes flashFade { 0%{opacity:1;} 100%{opacity:0;} }
 
-  .subtitle {
-    color: #94a3b8;
-    font-size: 14px;
-    margin-bottom: 18px;
-  }
-
-  .inputs-container {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
-
-  .inputs-row {
-    display: flex;
-    justify-content: center;
-    gap: 6px;
-  }
-
-  .code-input {
-    width: 40px;
-    height: 50px;
-    background: #040814;
-    border: 2px solid #1e293b;
-    border-radius: 6px;
-    color: #00ffcc;
-    font-family: 'Orbitron', monospace;
-    font-size: 19px;
-    font-weight: 900;
-    text-align: center;
-    text-transform: uppercase;
-    transition: all 0.2s ease;
-  }
-
-  .code-input:focus {
-    outline: none;
-    border-color: #00ffcc;
-    box-shadow: 0 0 14px rgba(0, 255, 204, 0.6);
-    transform: translateY(-2px);
-  }
-
-  .code-input.error {
-    border-color: #ef4444;
-    color: #ef4444;
-    box-shadow: 0 0 14px rgba(239, 68, 68, 0.6);
-    animation: shake 0.4s ease;
-  }
-
-  .code-input.success {
-    border-color: #22c55e;
-    color: #22c55e;
-    box-shadow: 0 0 14px rgba(34, 197, 94, 0.7);
-  }
-
-  @keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-4px); }
-    40%, 80% { transform: translateX(4px); }
-  }
-
-  .unlock-btn {
-    width: 100%;
-    background: linear-gradient(135deg, #00ffcc 0%, #00b4d8 100%);
-    color: #050811;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 15px;
-    font-weight: 900;
-    letter-spacing: 2px;
-    padding: 13px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    box-shadow: 0 0 25px rgba(0, 255, 204, 0.35);
-    transition: all 0.25s ease;
-  }
-
-  .unlock-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 35px rgba(0, 255, 204, 0.65);
-  }
-
-  .status-msg {
-    margin-top: 14px;
-    font-size: 13.5px;
-    font-weight: 700;
-    min-height: 20px;
-    color: #64748b;
-  }
-
-  /* Fullscreen Hack Transition Screen */
-  .hack-screen {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 120;
-    color: #00ffcc;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 16px;
-    padding: 40px;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-
-  /* Success Modal View */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.92);
-    z-index: 150;
-    justify-content: center;
-    align-items: center;
-    backdrop-filter: blur(12px);
-  }
-
-  .modal-card {
-    background: #091122;
-    border: 2px solid #ffe600;
-    box-shadow: 0 0 60px rgba(255, 230, 0, 0.5), inset 0 0 20px rgba(255, 230, 0, 0.1);
-    border-radius: 18px;
-    width: 92%;
-    max-width: 560px;
-    padding: 32px 24px;
-    text-align: center;
-    animation: zoomIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  }
-
-  @keyframes zoomIn {
-    from { opacity: 0; transform: scale(0.6); }
-    to { opacity: 1; transform: scale(1); }
-  }
-
-  .trophy-icon { font-size: 56px; margin-bottom: 8px; filter: drop-shadow(0 0 20px rgba(255, 230, 0, 0.8)); }
-  
-  .rank-badge {
-    display: inline-block;
-    background: linear-gradient(90deg, #ff007f, #7928ca);
-    color: #fff;
-    font-family: 'Orbitron', monospace;
-    font-size: 11px;
-    font-weight: 900;
-    padding: 4px 12px;
-    border-radius: 20px;
-    letter-spacing: 1.5px;
-    margin-bottom: 12px;
-  }
-
-  .modal-card h2 {
-    font-family: 'Orbitron', sans-serif;
-    color: #ffe600;
-    font-size: 22px;
-    margin-bottom: 8px;
-    letter-spacing: 1px;
-  }
-
-  .modal-card p {
-    color: #cbd5e1;
-    font-size: 14.5px;
-    line-height: 1.55;
-    margin-bottom: 16px;
-  }
-
-  .easter-egg-box {
-    background: rgba(0, 255, 204, 0.08);
-    border: 1px dashed #00ffcc;
-    border-radius: 8px;
-    padding: 12px;
-    font-size: 13.5px;
-    color: #00ffcc;
-    margin-bottom: 16px;
-    font-family: 'Share Tech Mono', monospace;
-  }
-
-  .brand-footer { color: #64748b; font-size: 12.5px; font-weight: 600; }
-  #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; }
+/* Projector winner modal */
+.proj-winner-modal { display:none; position:fixed; inset:0; z-index:190; justify-content:center; align-items:center; background:rgba(0,0,0,0.72); backdrop-filter:blur(8px); }
+.proj-winner-card { background:#050e1f; border:2px solid #22c55e; box-shadow:0 0 80px rgba(34,197,94,0.5); border-radius:20px; padding:36px 32px; text-align:center; animation:zoomIn 0.5s cubic-bezier(0.175,0.885,0.32,1.275); min-width:360px; max-width:90vw; }
+.proj-winner-card h2 { font-family:'Orbitron',sans-serif; color:#22c55e; font-size:28px; margin-bottom:12px; }
+.proj-winner-card p { color:#cbd5e1; font-size:16px; margin-bottom:8px; }
+.proj-winner-rank { font-family:'Orbitron',sans-serif; font-size:52px; margin-bottom:10px; }
 </style>
 </head>
 <body>
 
-  <canvas id="bg-canvas"></canvas>
-  <div class="glow-ring"></div>
-  <canvas id="confetti-canvas"></canvas>
+<canvas id="bg-canvas"></canvas>
+<div class="glow-ring"></div>
+<canvas id="confetti-canvas"></canvas>
+<div class="unlock-flash" id="unlock-flash"></div>
 
-  <div class="terminal-container">
-    <div class="brand-header">
-      <div class="teacher-name">⚡ PASAN RUHUNAGE &bull; SMART ICT</div>
-      <span class="paper-indicator" id="paper-indicator">SET 01</span>
-    </div>
-    
-    <h1>CYBER VAULT LOCK</h1>
-    <div class="subtitle">Enter the 16-character Master Key (Q1 to Q16) from your Paper:</div>
-
-    <div class="inputs-container">
-      <div class="inputs-row">
-        <input type="text" maxlength="1" class="code-input" data-index="0" autofocus>
-        <input type="text" maxlength="1" class="code-input" data-index="1">
-        <input type="text" maxlength="1" class="code-input" data-index="2">
-        <input type="text" maxlength="1" class="code-input" data-index="3">
-        <input type="text" maxlength="1" class="code-input" data-index="4">
-        <input type="text" maxlength="1" class="code-input" data-index="5">
-        <input type="text" maxlength="1" class="code-input" data-index="6">
-        <input type="text" maxlength="1" class="code-input" data-index="7">
-      </div>
-      <div class="inputs-row">
-        <input type="text" maxlength="1" class="code-input" data-index="8">
-        <input type="text" maxlength="1" class="code-input" data-index="9">
-        <input type="text" maxlength="1" class="code-input" data-index="10">
-        <input type="text" maxlength="1" class="code-input" data-index="11">
-        <input type="text" maxlength="1" class="code-input" data-index="12">
-        <input type="text" maxlength="1" class="code-input" data-index="13">
-        <input type="text" maxlength="1" class="code-input" data-index="14">
-        <input type="text" maxlength="1" class="code-input" data-index="15">
-      </div>
-    </div>
-
-    <button class="unlock-btn" onclick="checkCode()">🔓 UNLOCK VAULT</button>
-    <div class="status-msg" id="status-msg">AWAITING 16-DIGIT PASSCODE...</div>
+<!-- ======== STUDENT VIEW ======== -->
+<div id="student-view">
+  <div class="brand-header">
+    <div class="teacher-name">&#9889; PASAN RUHUNAGE &bull; SMART ICT</div>
+    <span class="paper-indicator" id="paper-indicator">SET 01</span>
   </div>
-
-  <div class="hack-screen" id="hack-screen">
-    <div style="font-size: 24px; font-weight: bold; margin-bottom: 12px;">INITIALIZING CYBER OVERRIDE...</div>
-    <div id="hack-logs" style="line-height: 1.6; text-align: left; max-width: 500px;"></div>
+  <h1>CYBER VAULT LOCK</h1>
+  <div class="subtitle">Enter the 16-character Master Key (Q01 to Q16) from your Paper:</div>
+  <div class="inputs-container">
+    <div class="inputs-row" id="inputs-row-1"></div>
+    <div class="inputs-row" id="inputs-row-2"></div>
   </div>
+  <button class="unlock-btn" onclick="checkCode()">&#128275; UNLOCK VAULT</button>
+  <div class="status-msg" id="status-msg">AWAITING 16-DIGIT PASSCODE...</div>
+  <button class="mode-toggle-btn" onclick="switchToProjector()">&#127909; PROJECTOR LIVE VIEW &nbsp;|&nbsp; Teacher Mode</button>
+</div>
 
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal-card">
-      <div class="trophy-icon">🏆🔥</div>
-      <div class="rank-badge">RANK #1 &bull; MASTER CIPHER BREAKER</div>
-      <h2>VAULT UNLOCKED!</h2>
-      <p>
-        සුබ පැතුම්! ඔබ <strong>FastTrack Warriors - 02 (SET <span id="solved-set-title">01</span>) හි ප්‍රශ්න 16ම</strong> සාර්ථකව විසඳා Cyber Vault එක Breach කර ඇත!<br><br>
-        <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථය</strong> ඔබේ අතේ! නියම වැඩක්! 🚀
-      </p>
-
-      <div class="easter-egg-box">
-        🎁 <strong>SECRET REWARD UNLOCKED:</strong><br>
-        "Logic is the foundation. Discipline is the code. Success is the execution!" &mdash; Pasan Ruhunage
-      </div>
-
-      <div class="brand-footer">Pasan Ruhunage &nbsp;|&nbsp; #smart_ict &nbsp;|&nbsp; Master Series 2028</div>
+<!-- ======== PROJECTOR VIEW ======== -->
+<div id="projector-view">
+  <div class="proj-topbar">
+    <div class="proj-brand">&#9889; SMART ICT &bull; PASAN RUHUNAGE</div>
+    <div class="proj-title">&#128272; FASTTRACK WARRIORS &mdash; LIVE VAULT MONITOR</div>
+    <div class="proj-controls">
+      <div class="stat-pill"><span id="conn-dot"></span><span id="conn-label">CONNECTING...</span></div>
+      <button class="proj-btn" onclick="toggleSound()" id="sound-btn">&#128265; SOUND ON</button>
+      <button class="proj-btn" onclick="toggleFullscreen()">&#9974; FULLSCREEN</button>
+      <button class="proj-btn danger" onclick="resetSession()">&#8634; RESET</button>
+      <button class="proj-student-btn" onclick="switchToStudent()">&#128241; STUDENT VIEW</button>
     </div>
   </div>
+  <div class="proj-stats">
+    <div class="stat-pill">&#128275; UNLOCKED: <span id="stat-unlocked">0</span> / 20</div>
+    <div class="stat-pill">&#9997; TYPING NOW: <span id="stat-typing">0</span></div>
+    <div class="stat-pill">&#8987; SESSION: <span id="stat-time">00:00</span></div>
+    <div class="stat-pill">AL/2028 &bull; FastTrack Warriors &mdash; 02</div>
+  </div>
+  <div class="proj-leaderboard" id="proj-leaderboard">
+    <span class="lb-label">&#127942; LEADERBOARD:</span>
+    <span style="color:#64748b">Waiting for first unlock...</span>
+  </div>
+  <div class="proj-grid" id="proj-grid"></div>
+</div>
+
+<!-- HACK SCREEN -->
+<div class="hack-screen" id="hack-screen">
+  <div style="font-size:24px;font-weight:bold;margin-bottom:12px;">INITIALIZING CYBER OVERRIDE...</div>
+  <div id="hack-logs" style="line-height:1.6;text-align:left;max-width:500px;"></div>
+</div>
+
+<!-- STUDENT SUCCESS MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-card">
+    <div class="trophy-icon">&#127942;&#128293;</div>
+    <div class="rank-badge" id="student-rank-badge">RANK #1 &bull; MASTER CIPHER BREAKER</div>
+    <h2>VAULT UNLOCKED!</h2>
+    <p>
+      සුබ පැතුම්! ඔබ <strong>FastTrack Warriors - 02 (SET <span id="solved-set-title">01</span>) හි ප්‍රශ්න 16ම</strong> සාර්ථකව විසඳා Cyber Vault එක Breach කර ඇත!<br><br>
+      <strong>A/L 2028 ICT විභාගයේ A සාමාර්ථය</strong> ඔබේ අතේ! නියම වැඩක්! &#128640;
+    </p>
+    <div class="easter-egg-box">
+      &#127873; <strong>SECRET REWARD UNLOCKED:</strong><br>
+      "Logic is the foundation. Discipline is the code. Success is the execution!" &mdash; Pasan Ruhunage
+    </div>
+    <div class="brand-footer">Pasan Ruhunage &nbsp;|&nbsp; #smart_ict &nbsp;|&nbsp; Master Series 2028</div>
+    <button class="close-modal-btn" onclick="document.getElementById('modal-overlay').style.display='none'">&#10006; CLOSE</button>
+  </div>
+</div>
+
+<!-- PROJECTOR WIN MODAL -->
+<div class="proj-winner-modal" id="proj-winner-modal">
+  <div class="proj-winner-card">
+    <div class="proj-winner-rank" id="proj-winner-rank">&#127881;</div>
+    <h2 id="proj-winner-title">SET 01 &mdash; VAULT BREACHED!</h2>
+    <p id="proj-winner-sub">First student to unlock the Cyber Vault!</p>
+    <p style="color:#00ffcc;font-family:'Orbitron',monospace;font-size:13px;margin-top:12px;" id="proj-winner-time"></p>
+    <button class="close-modal-btn" style="margin-top:16px;" onclick="document.getElementById('proj-winner-modal').style.display='none'">
+      &#10006; CONTINUE MONITORING
+    </button>
+  </div>
+</div>
 
 <script>
-  const bgCanvas = document.getElementById('bg-canvas');
-  const bgCtx = bgCanvas.getContext('2d');
-  function resizeCanvas() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
-  resizeCanvas();
-  window.addEventListener('resize', resizeCanvas);
+/* =============================================
+   VAULT DATABASE
+============================================= */
+const VAULT_DATABASE = {
+  "01":"CAFE2028BEEF1337","02":"BEEF2028CAFE5A8E","03":"FACE2028DEAD1010",
+  "04":"BABE2028FEED4095","05":"DEAD2028B0557256","06":"FEED2028C0018A8E",
+  "07":"C0DE2028ACDC3754","08":"A5BE2028FACE6422","09":"C0012028BABE1750",
+  "10":"B0552028CAFE3054","11":"ACDC2028BEEF6553","12":"FADE2028DEAD9901",
+  "13":"DAF02028FEED1467","14":"13372028C0DE7654","15":"8A8E2028A5BE1773",
+  "16":"DEED2028C0011352","17":"BEAD2028B0551101","18":"ACED2028ACDC1111",
+  "19":"2028EFBEEFCAFE01","20":"2028A1FACEFEED02"
+};
 
-  const characters = '0123456789ABCDEF';
-  const fontSize = 14;
-  let columns = Math.floor(bgCanvas.width / fontSize);
-  let drops = Array(columns).fill(1);
+const MQTT_BROKER = "wss://broker.emqx.io:8084/mqtt";
+const MQTT_TOPIC  = "smart-ict-vault-2028-fw02/set/";
 
-  function drawMatrix() {
-    bgCtx.fillStyle = 'rgba(2, 6, 18, 0.08)';
-    bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
-    bgCtx.fillStyle = '#00ffcc';
-    bgCtx.font = fontSize + 'px monospace';
-    for (let i = 0; i < drops.length; i++) {
-      const text = characters.charAt(Math.floor(Math.random() * characters.length));
-      bgCtx.fillText(text, i * fontSize, drops[i] * fontSize);
-      if (drops[i] * fontSize > bgCanvas.height && Math.random() > 0.975) drops[i] = 0;
-      drops[i]++;
-    }
-  }
-  setInterval(drawMatrix, 40);
+let isProjectorMode = false;
+let soundEnabled = true;
+let mqttClient = null;
+let currentPaper = "01";
+let sessionStartTime = null;
+let sessionTimerInterval = null;
+let unlockedCount = 0;
+let leaderboard = [];
 
-  const VAULT_DATABASE = {
-    "01": "CAFE2028BEEF1337", "02": "BEEF2028CAFE5A8E", "03": "FACE2028DEAD1010",
-    "04": "BABE2028FEED4095", "05": "DEAD2028B0557256", "06": "FEED2028C0018A8E",
-    "07": "C0DE2028ACDC3754", "08": "A5BE2028FACE6422", "09": "C0012028BABE1750",
-    "10": "B0552028CAFE3054", "11": "ACDC2028BEEF6553", "12": "FADE2028DEAD9901",
-    "13": "DAF02028FEED1467", "14": "13372028C0DE7654", "15": "8A8E2028A5BE1773",
-    "16": "DEED2028C0011352", "17": "BEAD2028B0551101", "18": "ACED2028ACDC1111",
-    "19": "2028EFBEEFCAFE01", "20": "2028A1FACEFEED02"
-  };
+const setStates = {};
+for (const k of Object.keys(VAULT_DATABASE)) {
+  setStates[k] = { filledCount: 0, status: "locked" };
+}
 
-  let currentPaper = "01";
-  const urlParams = new URLSearchParams(window.location.search);
-  const paramPaper = urlParams.get('p') || urlParams.get('paper');
+/* =============================================
+   ROUTING
+============================================= */
+const urlParams = new URLSearchParams(window.location.search);
+const paramPaper = urlParams.get('p') || urlParams.get('paper');
+const paramLive  = urlParams.get('live') || urlParams.get('projector') || urlParams.get('teacher');
 
-  const paperIndicator = document.getElementById('paper-indicator');
-  const inputs = document.querySelectorAll('.code-input');
-  const statusMsg = document.getElementById('status-msg');
-  const hackScreen = document.getElementById('hack-screen');
-  const hackLogs = document.getElementById('hack-logs');
-  const modalOverlay = document.getElementById('modal-overlay');
-  const solvedSetTitle = document.getElementById('solved-set-title');
-
+if (paramLive) {
+  startProjectorMode();
+} else {
   if (paramPaper) {
-    const cleanParam = String(parseInt(paramPaper)).padStart(2, '0');
-    if (VAULT_DATABASE[cleanParam]) currentPaper = cleanParam;
+    const clean = String(parseInt(paramPaper)).padStart(2,'0');
+    if (VAULT_DATABASE[clean]) currentPaper = clean;
   }
+  startStudentMode();
+}
 
-  function updatePaperDisplay() {
-    paperIndicator.innerText = `SET ${currentPaper}`;
-    statusMsg.style.color = "#64748b";
-    statusMsg.innerText = `AWAITING 16-DIGIT KEY FOR SET ${currentPaper}...`;
-    inputs.forEach(i => { i.value = ''; i.classList.remove('error', 'success'); });
-    inputs[0].focus();
+/* =============================================
+   BACKGROUND MATRIX
+============================================= */
+const bgCanvas = document.getElementById('bg-canvas');
+const bgCtx = bgCanvas.getContext('2d');
+function resizeBG() { bgCanvas.width = window.innerWidth; bgCanvas.height = window.innerHeight; }
+resizeBG(); window.addEventListener('resize', resizeBG);
+const HC = '0123456789ABCDEF'; const FS = 14;
+let drops = [];
+function drawMatrix() {
+  const cols = Math.floor(bgCanvas.width / FS);
+  if (drops.length !== cols) drops = Array(cols).fill(1);
+  bgCtx.fillStyle = 'rgba(2,6,18,0.07)';
+  bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+  bgCtx.fillStyle = '#00ffcc'; bgCtx.font = FS + 'px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    bgCtx.fillText(HC[Math.floor(Math.random()*16)], i*FS, drops[i]*FS);
+    if (drops[i]*FS > bgCanvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
   }
-  updatePaperDisplay();
+}
+setInterval(drawMatrix, 40);
 
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  function playSynth(freq, type, duration) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.value = freq;
-    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
-  }
+/* =============================================
+   AUDIO
+============================================= */
+const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSynth(freq, type, dur, vol=0.15) {
+  if (!soundEnabled) return;
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(vol, audioCtx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(); o.stop(audioCtx.currentTime + dur);
+}
+function playSuccessSound() {
+  playSynth(440,'sine',0.1); setTimeout(()=>playSynth(554,'sine',0.1),80);
+  setTimeout(()=>playSynth(659,'sine',0.1),160); setTimeout(()=>playSynth(880,'triangle',0.5),240);
+}
+function playFanfare() {
+  [523,587,659,784,880,1047].forEach((n,i)=>setTimeout(()=>playSynth(n,'triangle',0.4,0.25),i*110));
+}
+function playBlip(idx) { playSynth(350+idx*25,'sine',0.04,0.08); }
+function playBuzz() { playSynth(150,'sawtooth',0.35,0.2); }
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById('sound-btn').textContent = soundEnabled ? '\uD83D\uDD0A SOUND ON' : '\uD83D\uDD07 MUTE';
+}
 
-  function playSuccessSound() {
-    playSynth(440, 'sine', 0.1);
-    setTimeout(() => playSynth(554.37, 'sine', 0.1), 80);
-    setTimeout(() => playSynth(659.25, 'sine', 0.1), 160);
-    setTimeout(() => playSynth(880, 'triangle', 0.4), 240);
-  }
-
-  inputs.forEach((input, index) => {
-    input.addEventListener('input', () => {
-      input.value = input.value.toUpperCase();
-      playSynth(350 + index * 30, 'sine', 0.04);
-      if (input.value && index < inputs.length - 1) inputs[index + 1].focus();
-      if (index === inputs.length - 1 && input.value) checkCode();
+/* =============================================
+   MQTT
+============================================= */
+function connectMQTT() {
+  try {
+    const cid = 'vault_' + Math.random().toString(36).slice(2,10);
+    mqttClient = mqtt.connect(MQTT_BROKER, { clientId:cid, clean:true, connectTimeout:7000, reconnectPeriod:4000 });
+    mqttClient.on('connect', () => { updateConn(true); mqttClient.subscribe(MQTT_TOPIC + '+', {qos:0}); });
+    mqttClient.on('error', () => updateConn(false));
+    mqttClient.on('reconnect', () => updateConn(false));
+    mqttClient.on('offline', () => updateConn(false));
+    mqttClient.on('message', (topic, payload) => {
+      try {
+        const set = topic.split('/').pop();
+        handleUpdate(set, JSON.parse(payload.toString()));
+      } catch(e) {}
     });
+  } catch(e) { updateConn(false); }
 
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Backspace' && !input.value && index > 0) inputs[index - 1].focus();
+  // BroadcastChannel fallback (same device, multiple tabs)
+  try {
+    const bc = new BroadcastChannel('sict-vault-2028-fw02');
+    bc.onmessage = e => handleUpdate(e.data.set, e.data.data);
+    window._bc = bc; window._bcOK = true;
+  } catch(e) {}
+}
+
+function updateConn(online) {
+  const d = document.getElementById('conn-dot');
+  const l = document.getElementById('conn-label');
+  if (!d) return;
+  d.className = online ? 'online' : '';
+  if (l) l.textContent = online ? 'LIVE SYNC' : 'RECONNECTING...';
+}
+
+function publish(set, data) {
+  // CRITICAL: only count & status — NEVER character values
+  const safe = { count: data.count, status: data.status };
+  try { if (mqttClient && mqttClient.connected) mqttClient.publish(MQTT_TOPIC+set, JSON.stringify(safe), {qos:0, retain:false}); } catch(e){}
+  try { if (window._bcOK) window._bc.postMessage({ set, data: safe }); } catch(e){}
+}
+
+/* =============================================
+   PROJECTOR: Incoming updates
+============================================= */
+function handleUpdate(setNum, data) {
+  const s = String(setNum).padStart(2,'0');
+  if (!VAULT_DATABASE[s]) return;
+  const prev = setStates[s];
+  if (prev.status === 'unlocked') return;
+
+  setStates[s].filledCount = data.count || 0;
+
+  if (data.status === 'unlocked') {
+    setStates[s].status = 'unlocked';
+    setStates[s].filledCount = 16;
+    if (prev.status !== 'unlocked') recordUnlock(s);
+  } else if (data.status === 'denied') {
+    setStates[s].status = 'denied';
+    setTimeout(() => {
+      if (setStates[s].status === 'denied') {
+        setStates[s].status = setStates[s].filledCount > 0 ? 'typing' : 'locked';
+        updateCard(s);
+      }
+    }, 2000);
+  } else if (data.status === 'typing') {
+    setStates[s].status = data.count > 0 ? 'typing' : 'locked';
+  } else {
+    setStates[s].status = 'locked';
+  }
+  updateCard(s);
+}
+
+function recordUnlock(s) {
+  const rank = leaderboard.length + 1;
+  const t = new Date().toLocaleTimeString('en-US',{hour12:false});
+  leaderboard.push({ set:s, rank, time:t });
+  unlockedCount++;
+  const el = document.getElementById('stat-unlocked');
+  if (el) el.textContent = unlockedCount;
+  renderLeaderboard();
+  projectorCelebrate(s, rank);
+}
+
+function renderLeaderboard() {
+  const lb = document.getElementById('proj-leaderboard');
+  if (!lb) return;
+  const medals = ['&#127941;','&#129352;','&#129353;','4','5','6','7','8','9','10'];
+  lb.innerHTML = '<span class="lb-label">&#127942; LEADERBOARD:</span>' +
+    leaderboard.map((e,i) =>
+      `<span class="lb-entry">${medals[i]||'&#10003;'} <span class="lb-set">SET ${e.set}</span> <span class="lb-time">${e.time}</span></span>`
+    ).join('');
+}
+
+function projectorCelebrate(s, rank) {
+  const flash = document.getElementById('unlock-flash');
+  flash.classList.remove('active'); void flash.offsetWidth; flash.classList.add('active');
+  playFanfare();
+  launchConfetti(220);
+  const rankEmoji = ['&#127941;','&#129352;','&#129353;','&#127881;'];
+  document.getElementById('proj-winner-rank').innerHTML = rankEmoji[Math.min(rank,4)-1] || '&#10003;';
+  document.getElementById('proj-winner-title').textContent = `SET ${s} — VAULT BREACHED!`;
+  const labels = ['1st to break in!','2nd Vault Breaker!','3rd Breaker!'];
+  document.getElementById('proj-winner-sub').textContent = labels[rank-1] || `Rank #${rank} Breaker!`;
+  document.getElementById('proj-winner-time').textContent = '&#8987; TIME: ' + leaderboard.slice(-1)[0].time;
+  const m = document.getElementById('proj-winner-modal');
+  m.style.display = 'flex';
+  setTimeout(() => { if (m.style.display==='flex') m.style.display='none'; }, 5500);
+}
+
+/* =============================================
+   PROJECTOR: Card update
+============================================= */
+function buildGrid() {
+  const grid = document.getElementById('proj-grid');
+  grid.innerHTML = '';
+  for (const s of Object.keys(VAULT_DATABASE)) {
+    const card = document.createElement('div');
+    card.className = 'set-card'; card.id = 'card-' + s;
+    const slots = Array(16).fill(0).map((_,i)=>`<div class="slot-dot" id="slot-${s}-${i+1}"></div>`).join('');
+    card.innerHTML = `
+      <div class="set-card-header">
+        <span>SET ${s}</span>
+        <span class="set-status-badge" id="badge-${s}">&#128274; LOCKED</span>
+      </div>
+      <div class="slot-grid">${slots}</div>
+      <div class="set-rank-tag" id="rtag-${s}"></div>`;
+    grid.appendChild(card);
+  }
+}
+
+function updateCard(s) {
+  const state = setStates[s];
+  const card = document.getElementById('card-'+s);
+  const badge = document.getElementById('badge-'+s);
+  const rtag = document.getElementById('rtag-'+s);
+  if (!card) return;
+  card.className = 'set-card';
+
+  for (let i = 1; i <= 16; i++) {
+    const slot = document.getElementById(`slot-${s}-${i}`);
+    if (!slot) continue;
+    slot.className = 'slot-dot';
+    if (state.status === 'unlocked') slot.className = 'slot-dot unlocked-slot';
+    else if (state.status === 'denied') slot.className = 'slot-dot denied-slot';
+    else if (i <= state.filledCount) slot.className = 'slot-dot filled';
+  }
+
+  if (state.status === 'unlocked') {
+    card.classList.add('unlocked');
+    badge.className = 'set-status-badge unlocked'; badge.innerHTML = '&#128275; UNLOCKED';
+    const lb = leaderboard.find(e=>e.set===s);
+    if (lb) { const m=['&#127941;','&#129352;','&#129353;']; rtag.innerHTML=(m[lb.rank-1]||`#${lb.rank}`)+' RANK '+lb.rank; rtag.style.color='#22c55e'; }
+  } else if (state.status === 'denied') {
+    card.classList.add('denied');
+    badge.className = 'set-status-badge denied'; badge.innerHTML = '&#10060; DENIED';
+  } else if (state.status === 'typing') {
+    card.classList.add('typing');
+    badge.className = 'set-status-badge typing'; badge.textContent = '\u270D '+state.filledCount+'/16';
+  } else {
+    badge.className = 'set-status-badge'; badge.innerHTML = '&#128274; LOCKED';
+  }
+
+  const typingNow = Object.values(setStates).filter(s=>s.status==='typing').length;
+  const el = document.getElementById('stat-typing'); if (el) el.textContent = typingNow;
+}
+
+/* =============================================
+   SESSION TIMER
+============================================= */
+function startTimer() {
+  sessionStartTime = Date.now();
+  sessionTimerInterval = setInterval(()=>{
+    const e = Math.floor((Date.now()-sessionStartTime)/1000);
+    const el = document.getElementById('stat-time');
+    if (el) el.textContent = String(Math.floor(e/60)).padStart(2,'0')+':'+String(e%60).padStart(2,'0');
+  }, 1000);
+}
+
+function resetSession() {
+  if (!confirm('Reset all live data? Clears all unlocks and leaderboard.')) return;
+  for (const k of Object.keys(setStates)) { setStates[k]={filledCount:0,status:'locked'}; updateCard(k); }
+  leaderboard=[]; unlockedCount=0;
+  const su=document.getElementById('stat-unlocked'); if(su) su.textContent='0';
+  const st=document.getElementById('stat-typing'); if(st) st.textContent='0';
+  const lb=document.getElementById('proj-leaderboard');
+  if(lb) lb.innerHTML='<span class="lb-label">&#127942; LEADERBOARD:</span><span style="color:#64748b">Waiting for first unlock...</span>';
+  if(sessionTimerInterval) clearInterval(sessionTimerInterval);
+  startTimer(); playBuzz();
+}
+
+/* =============================================
+   MODE SWITCHES
+============================================= */
+function startProjectorMode() {
+  isProjectorMode = true;
+  document.getElementById('student-view').style.display = 'none';
+  document.getElementById('projector-view').style.display = 'flex';
+  buildGrid(); connectMQTT(); startTimer();
+}
+
+function startStudentMode() {
+  isProjectorMode = false;
+  document.getElementById('projector-view').style.display = 'none';
+  document.getElementById('student-view').style.display = 'block';
+  buildStudentInputs(); updateDisplay(); connectMQTT();
+}
+
+function switchToProjector() { startProjectorMode(); }
+function switchToStudent() {
+  isProjectorMode = false;
+  document.getElementById('projector-view').style.display = 'none';
+  document.getElementById('student-view').style.display = 'block';
+  if (!document.getElementById('inputs-row-1').children.length) buildStudentInputs();
+  updateDisplay();
+}
+function toggleFullscreen() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen();
+}
+
+/* =============================================
+   STUDENT: Build inputs
+============================================= */
+function buildStudentInputs() {
+  const r1 = document.getElementById('inputs-row-1');
+  const r2 = document.getElementById('inputs-row-2');
+  r1.innerHTML = ''; r2.innerHTML = '';
+  for (let i = 0; i < 16; i++) {
+    const inp = document.createElement('input');
+    inp.type = 'text'; inp.maxLength = 1; inp.className = 'code-input'; inp.dataset.index = i;
+    (i < 8 ? r1 : r2).appendChild(inp);
+  }
+  attachListeners();
+}
+
+function attachListeners() {
+  const inputs = document.querySelectorAll('.code-input');
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.toUpperCase().replace(/[^0-9A-F]/g,'');
+      playBlip(idx);
+      if (inp.value && idx < inputs.length-1) inputs[idx+1].focus();
+      if (idx === inputs.length-1 && inp.value) checkCode();
+      sendProgress(inputs);
+    });
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !inp.value && idx > 0) inputs[idx-1].focus();
       else if (e.key === 'Enter') checkCode();
+      setTimeout(()=>sendProgress(inputs), 50);
+    });
+    inp.addEventListener('paste', e => {
+      e.preventDefault();
+      const p = (e.clipboardData.getData('text')||'').toUpperCase().replace(/[^0-9A-F]/g,'');
+      if (p.length === 16) { for(let i=0;i<16;i++) if(inputs[i]) inputs[i].value=p[i]||''; sendProgress(inputs); checkCode(); }
     });
   });
+}
 
-  function checkCode() {
-    let enteredCode = "";
-    inputs.forEach(input => enteredCode += input.value.trim().toUpperCase());
+function sendProgress(inputs) {
+  const count = Array.from(inputs).filter(i=>i.value).length;
+  // Send ONLY count, never characters
+  publish(currentPaper, { count, status: count > 0 ? 'typing' : 'locked' });
+}
 
-    if (enteredCode.length < 16) {
-      statusMsg.style.color = "#f59e0b";
-      statusMsg.innerText = "⚠️ කරුණාකර ප්‍රශ්න 16 හිම අගයන් සම්පූර්ණ කරන්න!";
-      return;
-    }
+/* =============================================
+   STUDENT: Display helpers
+============================================= */
+function updateDisplay() {
+  document.getElementById('paper-indicator').textContent = 'SET '+currentPaper;
+  const m = document.getElementById('status-msg');
+  if (m) { m.style.color='#64748b'; m.textContent='AWAITING 16-DIGIT KEY FOR SET '+currentPaper+'...'; }
+  document.querySelectorAll('.code-input').forEach(i=>{ i.value=''; i.classList.remove('error','success'); });
+  const first = document.querySelector('.code-input'); if (first) first.focus();
+}
 
-    const correct = VAULT_DATABASE[currentPaper];
-    if (enteredCode === correct) {
-      inputs.forEach(i => { i.classList.remove('error'); i.classList.add('success'); });
-      statusMsg.style.color = "#22c55e";
-      statusMsg.innerText = "ACCESS GRANTED! OVERRIDING MAINFRAME...";
-      playSuccessSound();
+/* =============================================
+   STUDENT: Check code
+============================================= */
+function checkCode() {
+  const inputs = document.querySelectorAll('.code-input');
+  let code = '';
+  inputs.forEach(i => code += i.value.trim().toUpperCase());
 
-      hackScreen.style.display = 'flex';
-      const logs = [
-        "> [OK] 16-Bit Hash Verification: MATCHED",
-        "> [OK] Bypassing Security Layer 4...",
-        "> [OK] Decrypting Master Cipher for SET " + currentPaper + "...",
-        "> [OK] Access Granted to Smart ICT Vault!",
-        "> [OK] Welcome Elite Student!"
-      ];
-      hackLogs.innerHTML = "";
-      logs.forEach((log, idx) => {
-        setTimeout(() => {
-          hackLogs.innerHTML += log + "<br>";
-          playSynth(600 + idx * 100, 'sine', 0.05);
-        }, idx * 300);
-      });
+  const m = document.getElementById('status-msg');
+  if (code.length < 16) { m.style.color='#f59e0b'; m.textContent='⚠️ කරුණාකර ප්‍රශ්න 16 හිම අගයන් සම්පූර්ණ කරන්න!'; return; }
 
-      setTimeout(() => {
-        hackScreen.style.display = 'none';
-        solvedSetTitle.innerText = currentPaper;
-        launchConfetti();
-        modalOverlay.style.display = 'flex';
-      }, 1800);
+  const correct = VAULT_DATABASE[currentPaper];
+  if (code === correct) {
+    inputs.forEach(i=>{ i.classList.remove('error'); i.classList.add('success'); });
+    m.style.color='#22c55e'; m.textContent='ACCESS GRANTED! OVERRIDING MAINFRAME...';
+    playSuccessSound();
+    publish(currentPaper, { count:16, status:'unlocked' });
 
-    } else {
-      let copiedFrom = null;
-      for (const [pNum, pCode] of Object.entries(VAULT_DATABASE)) {
-        if (pCode === enteredCode && pNum !== currentPaper) {
-          copiedFrom = pNum;
-          break;
-        }
-      }
-      inputs.forEach(i => { i.classList.remove('success'); i.classList.add('error'); });
-      statusMsg.style.color = "#ef4444";
-      if (copiedFrom) {
-        statusMsg.innerText = `🚫 INVALID KEY! (මෙය Paper Set ${copiedFrom} හි කේතයකි. Copy කිරීමෙන් වලකින්න!)`;
-      } else {
-        statusMsg.innerText = `❌ ACCESS DENIED! කේතය වැරදියි. ගණනය කිරීම් නැවත බලන්න.`;
-      }
-      playSynth(150, 'sawtooth', 0.3);
-      setTimeout(() => { inputs.forEach(i => i.classList.remove('error')); }, 1200);
-    }
+    const hs = document.getElementById('hack-screen');
+    hs.style.display = 'flex';
+    const logs = [
+      '> [OK] 16-Bit Hash Verification: MATCHED',
+      '> [OK] Bypassing Security Layer 4...',
+      '> [OK] Decrypting Master Cipher for SET '+currentPaper+'...',
+      '> [OK] Access Granted to Smart ICT Vault!',
+      '> [OK] Welcome Elite Student!'
+    ];
+    document.getElementById('hack-logs').innerHTML = '';
+    logs.forEach((l,i) => setTimeout(()=>{ document.getElementById('hack-logs').innerHTML+=l+'<br>'; playSynth(600+i*100,'sine',0.05); }, i*300));
+    setTimeout(()=>{
+      hs.style.display='none';
+      document.getElementById('solved-set-title').textContent = currentPaper;
+      const rank = leaderboard.length+1;
+      const mk={1:'&#127941; RANK #1',2:'&#129352; RANK #2',3:'&#129353; RANK #3'};
+      document.getElementById('student-rank-badge').innerHTML = (mk[rank]||`RANK #${rank}`) + ' &bull; MASTER CIPHER BREAKER';
+      launchConfetti(160);
+      document.getElementById('modal-overlay').style.display='flex';
+    }, 1800);
+  } else {
+    let cf = null;
+    for (const [n,c] of Object.entries(VAULT_DATABASE)) { if(c===code && n!==currentPaper){cf=n;break;} }
+    inputs.forEach(i=>{ i.classList.remove('success'); i.classList.add('error'); });
+    m.style.color='#ef4444';
+    m.textContent = cf
+      ? `\uD83D\uDEAB INVALID KEY! (Paper Set ${cf} \u0DC7\u0DD2 \u0D9A\u0DDA\u0DAD\u0DBA\u0D9A\u0DD2\u0DC3\u0DD3. Copy \u0D9A\u0DD2\u0DBB\u0DBA\u0DC3\u0DBA\u0D9A\u0DD2.)`
+      : `\u274C ACCESS DENIED! \u0D9A\u0DDA\u0DAD\u0DBA \u0DC0\u0DAE\u0DCA\u0DBD\u0DD2\u0DBA\u0D9A\u0DD2. \u0D9C\u0DAB\u0DB1\u0DBA \u0D9A\u0DD2\u0DBB\u0DD3\u0DB8\u0DCA \u0DB1\u0DD0\u0DC0\u0DAD \u0DB6\u0DBD\u0DB1\u0DCA\u0DB1.`;
+    playBuzz();
+    publish(currentPaper, { count:code.length, status:'denied' });
+    setTimeout(()=>inputs.forEach(i=>i.classList.remove('error')), 1200);
   }
+}
 
-  function launchConfetti() {
-    const canvas = document.getElementById('confetti-canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    const pieces = [];
-    const colors = ['#00ffcc', '#ffe600', '#ff007f', '#00b4d8', '#ffffff'];
-    for (let i = 0; i < 150; i++) {
-      pieces.push({
-        x: canvas.width / 2, y: canvas.height / 2,
-        vx: (Math.random() - 0.5) * 22, vy: (Math.random() - 0.5) * 22 - 6,
-        size: Math.random() * 8 + 4, color: colors[Math.floor(Math.random() * colors.length)],
-        rotation: Math.random() * 360, rSpeed: (Math.random() - 0.5) * 10
-      });
-    }
-    function animate() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      let stillActive = false;
-      pieces.forEach(p => {
-        p.x += p.vx; p.y += p.vy; p.vy += 0.35; p.rotation += p.rSpeed;
-        if (p.y < canvas.height) stillActive = true;
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate((p.rotation * Math.PI) / 180);
-        ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
-        ctx.restore();
-      });
-      if (stillActive) requestAnimationFrame(animate);
-    }
-    animate();
+/* =============================================
+   CONFETTI
+============================================= */
+function launchConfetti(n=150) {
+  const cv = document.getElementById('confetti-canvas');
+  const ctx = cv.getContext('2d');
+  cv.width = window.innerWidth; cv.height = window.innerHeight;
+  const pieces = [];
+  const cols = ['#00ffcc','#ffe600','#ff007f','#00b4d8','#fff','#22c55e'];
+  for(let i=0;i<n;i++){
+    pieces.push({
+      x:Math.random()*cv.width, y:cv.height*Math.random()*0.3,
+      vx:(Math.random()-0.5)*18, vy:(Math.random()-0.5)*18-5,
+      size:Math.random()*8+4, color:cols[Math.floor(Math.random()*cols.length)],
+      rot:Math.random()*360, rs:(Math.random()-0.5)*12
+    });
   }
+  function go() {
+    ctx.clearRect(0,0,cv.width,cv.height);
+    let active=false;
+    pieces.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.vy+=0.35; p.rot+=p.rs;
+      if(p.y<cv.height) active=true;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+      ctx.fillStyle=p.color; ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size);
+      ctx.restore();
+    });
+    if(active) requestAnimationFrame(go);
+    else ctx.clearRect(0,0,cv.width,cv.height);
+  }
+  go();
+}
 </script>
 </body>
 </html>
